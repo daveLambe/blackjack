@@ -30,9 +30,10 @@ class Player(object):
     """
     Base Class - Player (Gambler & Dealer)
     """
-    def __init__(self, current_hand=[], hand_value=0, hit=False, stand=False):
+    def __init__(self, current_hand=[], soft_hand_value=0, hard_hand_value=0, hit=False, stand=False):
         self.current_hand = current_hand
-        self.hand_value = hand_value
+        self.soft_hand_value = soft_hand_value
+        self.hard_hand_value = hard_hand_value
         self.hit = hit
         self.stand = stand
 
@@ -48,21 +49,24 @@ class Player(object):
         for i in range(len(self.current_hand)):
             print self.current_hand[i][0]
             if self.current_hand[i][0].isdigit():
-                self.hand_value += int(self.current_hand[i][0])
+                self.soft_hand_value += int(self.current_hand[i][0])
+                self.hard_hand_value += int(self.current_hand[i][0])
             elif self.current_hand[i][0] == 'A':
-                self.hand_value += 11
+                self.soft_hand_value += 1
+                self.hard_hand_value += 11
             else:
-                self.hand_value += 10
-
-            print self.hand_value
+                self.soft_hand_value += 10
+                self.hard_hand_value += 10
+        print self.soft_hand_value
+        print self.hard_hand_value
 
 
 class Gambler(Player):
     """
     Subclass - Gambler
     """
-    def __init__(self, current_hand=[], hand_value=0, hit=False, stand=False, bet_amount=5, bankroll=100):
-        Player.__init__(self, current_hand, hand_value, hit, stand)
+    def __init__(self, current_hand=[], soft_hand_value=0, hard_hand_value=0, hit=False, stand=False, bet_amount=5, bankroll=100):
+        Player.__init__(self, current_hand, soft_hand_value, hard_hand_value, hit, stand)
         self.bankroll = bankroll
         self.bet_amount = bet_amount
 
@@ -76,8 +80,8 @@ class Dealer(Player):
     """
     Subclass - Dealer
     """
-    def __init__(self, current_hand=[], hand_value=0, hit=False, stand=False):
-        Player.__init__(self, current_hand, hand_value, hit, stand)
+    def __init__(self, current_hand=[], soft_hand_value=0, hard_hand_value=0, hit=False, stand=False):
+        Player.__init__(self, current_hand, soft_hand_value, hard_hand_value, hit, stand)
 
 print 'Deck INFO'
 DECK = Deck()

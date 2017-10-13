@@ -49,6 +49,8 @@ class Player(object):
             print self.current_hand[i][0]
             if self.current_hand[i][0].isdigit():
                 self.hand_value += int(self.current_hand[i][0])
+            elif self.current_hand[i][0] == 'A':
+                self.hand_value += 11
             else:
                 self.hand_value += 10
 

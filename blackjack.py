@@ -10,7 +10,6 @@ class Deck(object):
 
 # Methods
 
-
     def __init__(self):
         values = range(2, 10) + ('Jack King Queen Ace').split()
         suits = 'Diamonds Clubs Spades Hearts'.split()
@@ -41,7 +40,6 @@ class Player(object):
 
 # Base Class - Player (Gambler & Dealer)
 
-
     def __init__(self, current_hand=[], soft_hand_value=0, hard_hand_value=0, hit=False, stand=False):
         self.current_hand = current_hand
         self.soft_hand_value = soft_hand_value
@@ -56,8 +54,12 @@ class Player(object):
         self.current_hand.append(DECK.deck_of_cards[0])
         DECK.remove_dealt_card()
 
-    def print_current_hand(self):
-        print ', '.join(self.current_hand)
+    def print_current_hand_and_value(self):
+        print 'Your current hand:', ', '.join(self.current_hand)
+        if self.soft_hand_value != self.hard_hand_value:
+            print 'This hand has a Soft Value of', self.soft_hand_value, 'and a Hard Value of', self.hard_hand_value
+        else:
+            print 'This hand has a value of', self.hard_hand_value
 
     def calc_hand_value(self):
         for i in range(len(self.current_hand)):
@@ -131,7 +133,7 @@ print 'GAMBLER INFO'
 GAMBLER = Gambler()
 GAMBLER.ask_hit()
 GAMBLER.ask_hit()
-GAMBLER.print_current_hand()
+GAMBLER.print_current_hand_and_value()
 GAMBLER.calc_hand_value()
 GAMBLER.check_win_hand()
 print
@@ -140,14 +142,13 @@ print 'DEALER INFO'
 DEALER = Dealer()
 DEALER.ask_hit()
 DEALER.ask_hit()
-GAMBLER.print_current_hand()
+GAMBLER.print_current_hand_and_value()
 DEALER.check_win_hand()
 print
 
 print 'Logic printout:'
 while not GAMBLER.win and not DEALER.win:
-    print 'Your current hand:', GAMBLER.print_current_hand()
-    print 'This has a Soft Value of', GAMBLER.soft_hand_value, 'and a Hard Value of', GAMBLER.hard_hand_value
+    GAMBLER.print_current_hand_and_value()
     askPlayer = raw_input('Hit or Stay?')
 
 

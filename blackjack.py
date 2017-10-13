@@ -7,7 +7,7 @@ class Deck(object):
     Class for a Deck of cards
     """
     def __init__(self):
-        values = range(2, 11) + ('Jack King Queen Ace').split()
+        values = range(2, 10) + ('Jack King Queen Ace').split()
         suits = 'Diamonds Clubs Spades Hearts'.split()
         self.deck_of_cards = ['%s of %s' % (v, s) for v in values for s in suits]
 
@@ -46,8 +46,12 @@ class Player(object):
 
     def calc_hand_value(self):
         for i in range(len(self.current_hand)):
-            print self.current_hand[i]
-            self.hand_value = self.current_hand[i][0]
+            print self.current_hand[i][0]
+            if self.current_hand[i][0].isdigit():
+                self.hand_value += int(self.current_hand[i][0])
+            else:
+                self.hand_value += 10
+
             print self.hand_value
 
 
@@ -81,20 +85,23 @@ print
 print
 
 print 'Gambler INFO'
-P = Gambler()
-P.add_bankroll(40)
-print P.bankroll
-P.ask_hit()
-P.ask_hit()
+G = Gambler()
+G.add_bankroll(40)
+print G.bankroll
+G.ask_hit()
+G.ask_hit()
 DECK.print_deck()
 print
 print
+
 print 'Dealer INFO'
 Dealy = Dealer()
 Dealy.ask_hit()
 Dealy.ask_hit()
 DECK.print_deck()
 
-P.calc_hand_value()
+
+print G.current_hand
+G.calc_hand_value()
 
 

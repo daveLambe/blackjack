@@ -6,6 +6,11 @@ class Deck(object):
     """
     Class for a Deck of cards
     """
+
+
+# Methods
+
+
     def __init__(self):
         values = range(2, 10) + ('Jack King Queen Ace').split()
         suits = 'Diamonds Clubs Spades Hearts'.split()
@@ -28,8 +33,15 @@ class Deck(object):
 
 class Player(object):
     """
-    Base Class - Player (Gambler & Dealer)
+    Class Object Attributes
     """
+
+    win = False
+
+
+# Base Class - Player (Gambler & Dealer)
+
+
     def __init__(self, current_hand=[], soft_hand_value=0, hard_hand_value=0, hit=False, stand=False):
         self.current_hand = current_hand
         self.soft_hand_value = soft_hand_value
@@ -37,13 +49,15 @@ class Player(object):
         self.hit = hit
         self.stand = stand
 
+
+# Methods
+
     def ask_hit(self):
         self.current_hand.append(DECK.deck_of_cards[0])
-        print self.current_hand
         DECK.remove_dealt_card()
 
-
-# CURRENTLY WORKING ON THIS
+    def print_current_hand(self):
+        print ', '.join(self.current_hand)
 
     def calc_hand_value(self):
         for i in range(len(self.current_hand)):
@@ -60,6 +74,13 @@ class Player(object):
         print self.soft_hand_value
         print self.hard_hand_value
 
+    def check_win_hand(self):
+        if self.soft_hand_value == 21 or self.hard_hand_value == 21:
+            self.win = True
+            print 'Player has won!'
+        else:
+            print 'Player has not won yet'
+
 
 class Gambler(Player):
     """
@@ -70,11 +91,15 @@ class Gambler(Player):
         self.bankroll = bankroll
         self.bet_amount = bet_amount
 
+
+# Methods
+
     def add_bankroll(self, new_bankroll):
         self.bankroll += new_bankroll
 
     def change_bet_amount(self, new_bet_amount):
         self.bet_amount = new_bet_amount
+
 
 class Dealer(Player):
     """
@@ -83,31 +108,84 @@ class Dealer(Player):
     def __init__(self, current_hand=[], soft_hand_value=0, hard_hand_value=0, hit=False, stand=False):
         Player.__init__(self, current_hand, soft_hand_value, hard_hand_value, hit, stand)
 
+
+# Methods
+
+
+
+# End Classes
+
+
+
+# Start Logic
+
+print "Let's play BlackJack!"
+
 print 'Deck INFO'
 DECK = Deck()
 DECK.print_deck()
 DECK.shuffle_deck()
 print
+
+print 'GAMBLER INFO'
+GAMBLER = Gambler()
+GAMBLER.ask_hit()
+GAMBLER.ask_hit()
+GAMBLER.print_current_hand()
+GAMBLER.calc_hand_value()
+GAMBLER.check_win_hand()
 print
 
-print 'Gambler INFO'
-G = Gambler()
-G.add_bankroll(40)
-print G.bankroll
-G.ask_hit()
-G.ask_hit()
-DECK.print_deck()
-print
+print 'DEALER INFO'
+DEALER = Dealer()
+DEALER.ask_hit()
+DEALER.ask_hit()
+GAMBLER.print_current_hand()
+DEALER.check_win_hand()
 print
 
-print 'Dealer INFO'
-Dealy = Dealer()
-Dealy.ask_hit()
-Dealy.ask_hit()
-DECK.print_deck()
+print 'Logic printout:'
+while not GAMBLER.win and not DEALER.win:
+    print 'Your current hand:', GAMBLER.print_current_hand()
+    print 'This has a Soft Value of', GAMBLER.soft_hand_value, 'and a Hard Value of', GAMBLER.hard_hand_value
+    askPlayer = raw_input('Hit or Stay?')
 
 
-print G.current_hand
-G.calc_hand_value()
+
+
+# print
+# print
+# print 'Deck INFO'
+# DECK = Deck()
+# DECK.print_deck()
+# DECK.shuffle_deck()
+# print
+# print
+#
+# print 'Gambler INFO'
+# G = Gambler()
+# G.add_bankroll(40)
+# print G.bankroll
+# G.ask_hit()
+# G.ask_hit()
+# DECK.print_deck()
+# print G.current_hand
+# G.calc_hand_value()
+# print
+# print
+#
+# print 'Dealer INFO'
+# Dealy = Dealer()
+# Dealy.ask_hit()
+# Dealy.ask_hit()
+# DECK.print_deck()
+# print Dealy.current_hand
+# Dealy.calc_hand_value()
+
+
+
+
+
+
 
 

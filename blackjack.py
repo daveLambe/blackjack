@@ -35,8 +35,6 @@ class Player(object):
     Class Object Attributes
     """
 
-    win = False
-
 
 # Base Class - Player (Gambler & Dealer)
 
@@ -47,7 +45,6 @@ class Player(object):
         self.hit = hit
         self.stand = stand
 
-
 # Methods
 
     def ask_hit(self):
@@ -55,15 +52,16 @@ class Player(object):
         DECK.remove_dealt_card()
 
     def print_current_hand_and_value(self):
-        print 'Your current hand:', ', '.join(self.current_hand)
+        print 'Your current hand is:', ', '.join(self.current_hand)
         if self.soft_hand_value != self.hard_hand_value:
             print 'This hand has a Soft Value of', self.soft_hand_value, 'and a Hard Value of', self.hard_hand_value
         else:
-            print 'This hand has a value of', self.hard_hand_value
+            print 'This hand has a value of:', self.hard_hand_value
 
     def calc_hand_value(self):
+        self.soft_hand_value = 0
+        self.hard_hand_value = 0
         for i in range(len(self.current_hand)):
-            print self.current_hand[i][0]
             if self.current_hand[i][0].isdigit():
                 self.soft_hand_value += int(self.current_hand[i][0])
                 self.hard_hand_value += int(self.current_hand[i][0])
@@ -73,15 +71,17 @@ class Player(object):
             else:
                 self.soft_hand_value += 10
                 self.hard_hand_value += 10
-        print self.soft_hand_value
-        print self.hard_hand_value
 
     def check_win_hand(self):
         if self.soft_hand_value == 21 or self.hard_hand_value == 21:
-            self.win = True
             print 'Player has won!'
+            return True
+        elif self.soft_hand_value > 21 or self.hard_hand_value > 21:
+            print 'Bust!'
+            return True
         else:
-            print 'Player has not won yet'
+            return False
+
 
 
 class Gambler(Player):
@@ -96,11 +96,27 @@ class Gambler(Player):
 
 # Methods
 
+    def print_bankroll(self):
+        print 'Your bank contains', self.bankroll
+        print
+        print
+
     def add_bankroll(self, new_bankroll):
         self.bankroll += new_bankroll
 
     def change_bet_amount(self, new_bet_amount):
         self.bet_amount = new_bet_amount
+
+    def player_turn(self):
+        GAMBLER.print_current_hand_and_value()
+        GAMBLER.print_bankroll()
+        ask_player = raw_input('Hit or Stay?')
+        if ask_player == 'hit':
+            GAMBLER.ask_hit()
+            GAMBLER.calc_hand_value()
+            GAMBLER.print_current_hand_and_value()
+        elif ask_player == 'stay':
+            print 'You chose to stay'
 
 
 class Dealer(Player):
@@ -146,10 +162,16 @@ GAMBLER.print_current_hand_and_value()
 DEALER.check_win_hand()
 print
 
+
+
 print 'Logic printout:'
-while not GAMBLER.win and not DEALER.win:
-    GAMBLER.print_current_hand_and_value()
-    askPlayer = raw_input('Hit or Stay?')
+
+while not GAMBLER.check_win_hand():
+    GAMBLER.player_turn()
+
+
+
+
 
 
 
@@ -182,11 +204,3 @@ while not GAMBLER.win and not DEALER.win:
 # DECK.print_deck()
 # print Dealy.current_hand
 # Dealy.calc_hand_value()
-
-
-
-
-
-
-
-

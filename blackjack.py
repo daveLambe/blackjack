@@ -71,10 +71,10 @@ class Player(object):
                 self.soft_hand_value += 10
                 self.hard_hand_value += 10
 
-    def check_win_or_bust(self):
+    def check_win(self):
         global game_over
         if self.soft_hand_value == 21 or self.hard_hand_value == 21:
-            print self.__class__.__name__, 'has won!'
+            print self.__class__.__name__, 'has won! - from check win'
             game_over = True
             return True
         # elif self.soft_hand_value > 21 or self.hard_hand_value > 21:
@@ -86,7 +86,7 @@ class Player(object):
     def check_bust(self):
         global game_over
         if self.soft_hand_value > 21 or self.hard_hand_value > 21:
-            print self.__class__.__name__, 'is bust!'
+            print self.__class__.__name__, 'is bust! - from check bust'
             game_over = True
             return True
         else:
@@ -127,10 +127,8 @@ class Gambler(Player):
             GAMBLER.print_current_hand_and_value()
         elif ask_player == 'stay':
             gambler_turn_over = True
-            print 'Dealers turn'
+            print 'Dealers turn - from gambler_turn'
             DEALER.dealer_turn()
-
-
 
 
 class Dealer(Player):
@@ -144,21 +142,23 @@ class Dealer(Player):
 # Methods
 
     def dealer_turn(self):
-        while DEALER.soft_hand_value < 17 and DEALER.hard_hand_value < 17:
+        global game_over
+        if DEALER.soft_hand_value < 17 and DEALER.hard_hand_value < 17:
             DEALER.ask_hit()
             DEALER.calc_hand_value()
             DEALER.print_current_hand_and_value()
-            DEALER.check_win_or_bust()
+            DEALER.check_win()
             DEALER.check_bust()
-            if DEALER.soft_hand_value == 21 or DEALER.hard_hand_value == 21:
-                print 'Dealer wins at 21!'
-            else:
-                print 'At least 17 reached'
-
-
+        elif DEALER.soft_hand_value == 21 or DEALER.hard_hand_value == 21:
+                DEALER.print_current_hand_and_value()
+                game_over = True
+                print 'Dealer wins at 21! - from dealer turn'
+        else:
+            DEALER.print_current_hand_and_value()
+            game_over = True
+            print 'dealer reached at least 17'
 
 # End Classes
-
 
 
 # Start Logic
@@ -199,21 +199,50 @@ DEALER.print_current_hand_and_value()
 print
 print
 # check if gambler wins already
-GAMBLER.check_win_or_bust()
-# check if dealer wins already
-DEALER.check_win_or_bust()
+GAMBLER.check_win()
+DEALER.check_win()
 
 
-while not gambler_turn_over and not GAMBLER.check_bust():
-    GAMBLER.gambler_turn()
-    GAMBLER.check_win_or_bust()
-    GAMBLER.check_bust()
-
-if not game_over:
-    if GAMBLER.hard_hand_value > DEALER.hard_hand_value:
-        print 'Gambler Wins'
+while not game_over:
+    if gambler_turn_over:
+        DEALER.dealer_turn()
+        DEALER.calc_hand_value()
+        DEALER.check_win()
+        DEALER.check_bust()
     else:
-        print 'Dealer Wins!'
+        GAMBLER.gambler_turn()
+        GAMBLER.calc_hand_value()
+        GAMBLER.check_win()
+        GAMBLER.check_bust()
+
+if GAMBLER.check_win() or DEALER.check_bust():
+        print 'Gambler Wins with a hand value of', GAMBLER.hard_hand_value
+elif DEALER.check_win() or GAMBLER.check_bust():
+    print 'Dealer Wins with a hand value of', DEALER.hard_hand_value
+elif GAMBLER.hard_hand_value > DEALER.hard_hand_value:
+    print 'Gambler Wins with a hand value of', GAMBLER.hard_hand_value
+elif DEALER.hard_hand_value > GAMBLER.hard_hand_value:
+    print 'Dealer Wins with a hand value of', DEALER.hard_hand_value
+else:
+    print 'Tie!'
+
+
+
+
+# check if dealer wins already
+
+#
+# while not gambler_turn_over and not GAMBLER.check_bust():
+#     GAMBLER.gambler_turn()
+#     GAMBLER.check_win_or_bust()
+#     GAMBLER.check_bust()
+
+
+# if not game_over:
+#     if GAMBLER.hard_hand_value > DEALER.hard_hand_value:
+#         print 'Gambler Wins'
+#     else:
+#         print 'Dealer Wins!'
 
 # If not, gambler can hit or stay
 # if hit:

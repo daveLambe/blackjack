@@ -72,8 +72,10 @@ class Player(object):
                 self.hard_hand_value += 10
 
     def check_win_or_bust(self):
+        global game_over
         if self.soft_hand_value == 21 or self.hard_hand_value == 21:
             print self.__class__.__name__, 'has won!'
+            game_over = True
             return True
         # elif self.soft_hand_value > 21 or self.hard_hand_value > 21:
         #     print self.__class__.__name__, 'has bust!'
@@ -82,11 +84,13 @@ class Player(object):
             return False
 
     def check_bust(self):
+        global game_over
         if self.soft_hand_value > 21 or self.hard_hand_value > 21:
+            print self.__class__.__name__, 'is bust!'
+            game_over = True
             return True
         else:
             return False
-
 
 class Gambler(Player):
     """
@@ -112,6 +116,8 @@ class Gambler(Player):
         self.bet_amount = new_bet_amount
 
     def gambler_turn(self):
+        global gambler_turn_over
+        GAMBLER.calc_hand_value()
         GAMBLER.print_current_hand_and_value()
         GAMBLER.print_bankroll()
         ask_player = raw_input('Hit or Stay?')
@@ -120,8 +126,11 @@ class Gambler(Player):
             GAMBLER.calc_hand_value()
             GAMBLER.print_current_hand_and_value()
         elif ask_player == 'stay':
+            gambler_turn_over = True
             print 'Dealers turn'
             DEALER.dealer_turn()
+
+
 
 
 class Dealer(Player):
@@ -140,7 +149,11 @@ class Dealer(Player):
             DEALER.calc_hand_value()
             DEALER.print_current_hand_and_value()
             DEALER.check_win_or_bust()
-        print 'At least 17 reached'
+            DEALER.check_bust()
+            if DEALER.soft_hand_value == 21 or DEALER.hard_hand_value == 21:
+                print 'Dealer wins at 21!'
+            else:
+                print 'At least 17 reached'
 
 
 
@@ -158,6 +171,7 @@ print
 
 # SUDO CODE!
 # Make a Deck
+gambler_turn_over = False
 game_over = False
 DECK = Deck()
 # Shuffle deck
@@ -173,9 +187,9 @@ GAMBLER.ask_hit()
 DEALER.ask_hit()
 DEALER.ask_hit()
 # calc gambler hand and value
-GAMBLER.calc_hand_value()
+#GAMBLER.calc_hand_value()
 # print gambler hand and value
-GAMBLER.print_current_hand_and_value()
+#GAMBLER.print_current_hand_and_value()
 print
 print
 # calc dealer hand and value
@@ -190,8 +204,16 @@ GAMBLER.check_win_or_bust()
 DEALER.check_win_or_bust()
 
 
-while not GAMBLER.check_win_or_bust() or DEALER.check_win_or_bust():
+while not gambler_turn_over and not GAMBLER.check_bust():
     GAMBLER.gambler_turn()
+    GAMBLER.check_win_or_bust()
+    GAMBLER.check_bust()
+
+if not game_over:
+    if GAMBLER.hard_hand_value > DEALER.hard_hand_value:
+        print 'Gambler Wins'
+    else:
+        print 'Dealer Wins!'
 
 # If not, gambler can hit or stay
 # if hit:

@@ -31,7 +31,8 @@ class Deck(object):
 
 class Player(object):
     """
-    Class Object Attributes
+    Class for Player (Gambler or Dealer)
+    Has attributes and methods used by both
     """
 
 
@@ -73,14 +74,14 @@ class Player(object):
                 self.hard_hand_value += 10
 
     def check_win(self):
+        # Sudo hard vs soft
+        # if players hard hand value is greater than 21
+        #     players hard hand value = players soft hand value
         global game_over
         if self.soft_hand_value == 21 or self.hard_hand_value == 21:
             print self.__class__.__name__, 'has won! - from check win'
             game_over = True
             return True
-        # elif self.soft_hand_value > 21 or self.hard_hand_value > 21:
-        #     print self.__class__.__name__, 'has bust!'
-        #     return True
         else:
             return False
 
@@ -93,19 +94,29 @@ class Player(object):
         else:
             return False
 
-    def check_highest_hand(self):
+    def check_use_hard_or_soft(self):
         global winner
         print
-        print 'Final score.. \nDealer: %s \nGambler: %s' % (DEALER.hard_hand_value, GAMBLER.hard_hand_value)
-        if GAMBLER.hard_hand_value == DEALER.hard_hand_value:
+        if self.soft_hand_value != self.hard_hand_value:
+            if self.hard_hand_value < 21:
+                self.soft_hand_value = self.hard_hand_value
+            else:
+                print 'Hard value too high to use'
+
+    def check_winning_hand(self, a, b):
+        global winner
+        print
+        print 'Final score.. \nDealer: %s \nGambler: %s' % (b.soft_hand_value, a.soft_hand_value)
+        if a.soft_hand_value == b.soft_hand_value:
             print 'Tied hand!'
             winner = 'Nobody!'
-        elif GAMBLER.hard_hand_value > DEALER.hard_hand_value:
+        elif a.soft_hand_value > b.soft_hand_value:
             print 'Gambler wins by Higher Valued hand!'
             winner = 'Gambler'
         else:
             print 'Dealer wins by Higher Valued hand!'
             winner = 'Dealer'
+
 
 class Gambler(Player):
     """
@@ -160,28 +171,28 @@ class Dealer(Player):
         global game_over
         global dealer_turn_over
         print '\nDealers turn..'
-        if self.soft_hand_value < 17 or (self.hard_hand_value < 17 and self.hard_hand_value > 20):
+        if self.hard_hand_value < 21:
+            if self.hard_hand_value < 17:
+                'Dealer needs to draw a card'
+                self.deal_card()
+                DEALER.print_current_hand_and_value()
+                return True
+            else:
+                print 'Dealer does not need to draw a card'
+                dealer_turn_over = True
+                return False
+        elif self.soft_hand_value < 17:
             print 'Dealer needs to draw a card'
             self.deal_card()
             DEALER.print_current_hand_and_value()
             return True
-        # elif self.soft_hand_value == 21 or self.hard_hand_value == 21:
-        #     self.print_current_hand_and_value()
-        #     game_over = True
-        #     print 'Dealer wins at 21! - from dealer turn'
-        #     return False
         else:
-            # self.print_current_hand_and_value()
-            # game_over = True
-            # print 'dealer reached at least 17'
             print 'Dealer does not need to draw a card'
             dealer_turn_over = True
             return False
 
+
 # End Classes
-
-
-# Start Logic
 
 # Sudo Main logic - Start Game
 
@@ -264,46 +275,15 @@ while not game_over:
             else:
                 DEALER.dealer_turn()
 
-
     if not game_over:
-        DEALER.check_highest_hand()
+        GAMBLER.check_use_hard_or_soft()
+        DEALER.check_use_hard_or_soft()
+        GAMBLER.check_winning_hand(GAMBLER, DEALER)
         game_over = True
 
 print
 print
 print 'Winner of the hand is %s' % winner
-
-
-# Sudo Main Logic
-# Create Deck ---
-# Shuffle Deck ---
-# Create Gambler ---
-# Create Dealer ---
-# Give Gambler two cards ---
-# Give Dealer two cards ---
-# Check if either wins on open ---
-
-# If win:
-# present win ---
-# ask player if they want to play again
-#
-# If not win:
-# Ask Gambler hit or stay ---
-# If hit, deal card ---
-# Check if they win - If so, tell win and ask if play again
-# Check if they bust - If so, tell lose and ask if play again
-#
-# Repeat until they say stay
-# After stay:
-# When they say stay:
-# If dealer below 17, give dealer card.
-# Check if dealer win
-# Check if dealer bust
-# Repeat until dealer gets to at least 17
-#
-# If nobody win or bust by here, simply check who has higher card value or if tie.
-# Present winner or tie and ask if player again
-
 
 
 

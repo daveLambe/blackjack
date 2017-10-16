@@ -94,12 +94,16 @@ class Player(object):
             return False
 
     def check_highest_hand(self):
+        global winner
         if GAMBLER.hard_hand_value == DEALER.hard_hand_value:
             print 'Tied hand!'
+            winner = 'Nobody!'
         elif GAMBLER.hard_hand_value > DEALER.hard_hand_value:
             print 'Gambler wins by Higher Valued hand!'
+            winner = 'Gambler'
         else:
             print 'Dealer wins by Higher Valued hand!'
+            winner = 'Dealer'
 
 class Gambler(Player):
     """
@@ -125,6 +129,7 @@ class Gambler(Player):
         self.bet_amount = new_bet_amount
 
     def gambler_turn(self):
+        global gambler_turn_over
         GAMBLER.print_bankroll()
         ask_player = raw_input('Hit or Stay?')
         if ask_player == 'hit':
@@ -132,12 +137,10 @@ class Gambler(Player):
             self.print_current_hand_and_value()
             return True
         elif ask_player == 'stay':
-            print 'Dealers turn - from gambler_turn'
-            self.gambler_turn_over()
+            print 'Dealers turn! \nHere is the final Gambler hand'
+            self.print_current_hand_and_value()
+            gambler_turn_over = True
             return False
-
-    def gambler_turn_over(self):
-        return True
 
 
 class Dealer(Player):
@@ -152,7 +155,8 @@ class Dealer(Player):
 
     def dealer_turn(self):
         global game_over
-        if self.soft_hand_value < 17 and self.hard_hand_value < 17:
+        global dealer_turn_over
+        while self.soft_hand_value < 17 and self.hard_hand_value < 17:
             self.deal_card()
             return True
         # elif self.soft_hand_value == 21 or self.hard_hand_value == 21:
@@ -164,6 +168,7 @@ class Dealer(Player):
             # self.print_current_hand_and_value()
             # game_over = True
             # print 'dealer reached at least 17'
+            dealer_turn_over = True
             return False
 
 # End Classes
@@ -171,48 +176,17 @@ class Dealer(Player):
 
 # Start Logic
 
-
-# Last working code
-# # SUDO CODE!
-# # Make a Deck
-# gambler_turn_over = False
-# game_over = False
-# DECK = Deck()
-# # Shuffle deck
-# DECK.shuffle_deck()
-# # make a gambler
-# GAMBLER = Gambler()
-# # make a dealer
-# DEALER = Dealer()
-# # give gambler two cards
-# GAMBLER.ask_hit()
-# GAMBLER.ask_hit()
-# # give dealer two cards
-# DEALER.ask_hit()
-# DEALER.ask_hit()
-# # calc gambler hand and value
-# #GAMBLER.calc_hand_value()
-# # print gambler hand and value
-# #GAMBLER.print_current_hand_and_value()
-# print
-# print
-# # calc dealer hand and value
-# DEALER.calc_hand_value()
-# # print dealers hand and value
-# DEALER.print_current_hand_and_value()
-# print
-# print
-# # check if gambler wins already
-# GAMBLER.check_win()
-# DEALER.check_win()
-
 # Sudo Main logic - Start Game
+
 print
 print
 print "Let's play BlackJack!"
 print
 print
 game_over = False
+gambler_turn_over = False
+dealer_turn_over = False
+winner = 'blank'
 DECK = Deck()
 DECK.shuffle_deck()
 GAMBLER = Gambler()
@@ -226,55 +200,66 @@ GAMBLER.print_current_hand_and_value()
 print
 DEALER.print_current_hand_and_value()
 
-# Sudo Main logic - Check for WIN on OPEN
+# Main logic - Check for WIN on OPEN
+
 if GAMBLER.check_win():
     print 'Gambler gets BlackJack on open!'
     game_over = True
+    winner = 'Gambler'
 elif GAMBLER.check_bust():
     print 'Gambler busts on open!'
     game_over = True
+    winner = 'Dealer'
 
 if DEALER.check_win():
     print 'Dealer gets BlackJack on open!'
     game_over = True
+    winner = 'Dealer'
 elif DEALER.check_bust():
     print 'Dealer busts on open!'
     game_over = True
+    winner = 'Gambler'
 
+# Main logic - If nobody wins on Open
 
+while not game_over:
+    while not gambler_turn_over:
+        GAMBLER.gambler_turn()
 
-# Sudo Main logic - Nobody wins on open
-if not game_over:
-    while GAMBLER.gambler_turn():
         if GAMBLER.check_win():
             print 'Gambler wins NOT ON OPEN'
+            gambler_turn_over = True
             game_over = True
+            winner = 'GAMBLER'
         elif GAMBLER.check_bust():
             print 'Gambler busts NOT ON OPEN'
+            winner = 'DEALER'
+            gambler_turn_over = True
             game_over = True
         else:
-            GAMBLER.gambler_turn()
-            GAMBLER.check_bust()
-            GAMBLER.check_win()
-            GAMBLER.print_current_hand_and_value()
+            print 'meow'
 
-    while DEALER.dealer_turn():
-        if DEALER.check_win():
+    if not GAMBLER.check_win() and not GAMBLER.check_bust():
+        while not dealer_turn_over:
+            DEALER.dealer_turn()
             DEALER.print_current_hand_and_value()
-            print 'Dealer wins NOT ON OPEN'
-            game_over = True
-        elif DEALER.check_bust():
-            DEALER.print_current_hand_and_value()
-            print 'Dealer busts NOT ON OPEN'
-            game_over = True
-        else:
-            DEALER.print_current_hand_and_value()
+            if DEALER.check_win():
+                print 'Dealer wins NOT ON OPEN'
+                winner = 'DEALER'
+                dealer_turn_over = True
+                game_over = True
+            elif DEALER.check_bust():
+                print 'Dealer busts NOT ON OPEN'
+                winner = 'GAMBLER'
+                dealer_turn_over = True
+                game_over = True
+            else:
+                GAMBLER.check_highest_hand()
+                game_over = True
 
-    GAMBLER.check_highest_hand()
-    game_over = True
 
-else:
-    print 'Game is over following all logic. game_over = True'
+print 'Winner of the hand is %s' % winner
+
 
 # Sudo Main Logic
 # Create Deck ---
@@ -309,88 +294,6 @@ else:
 
 
 
-# Last working code
-# while not game_over:
-#     if gambler_turn_over:
-#         DEALER.dealer_turn()
-#         DEALER.calc_hand_value()
-#         DEALER.check_win()
-#         DEALER.check_bust()
-#     else:
-#         GAMBLER.gambler_turn()
-#         GAMBLER.calc_hand_value()
-#         GAMBLER.check_win()
-#         GAMBLER.check_bust()
-#
-# if GAMBLER.check_win() or DEALER.check_bust():
-#         print 'Gambler Wins with a hand value of', GAMBLER.hard_hand_value
-# elif DEALER.check_win() or GAMBLER.check_bust():
-#     print 'Dealer Wins with a hand value of', DEALER.hard_hand_value
-# elif GAMBLER.hard_hand_value > DEALER.hard_hand_value:
-#     print 'Gambler Wins with a hand value of', GAMBLER.hard_hand_value
-# elif DEALER.hard_hand_value > GAMBLER.hard_hand_value:
-#     print 'Dealer Wins with a hand value of', DEALER.hard_hand_value
-# else:
-#     print 'Tie!'
-
-
-
-
-# check if dealer wins already
-
-#
-# while not gambler_turn_over and not GAMBLER.check_bust():
-#     GAMBLER.gambler_turn()
-#     GAMBLER.check_win_or_bust()
-#     GAMBLER.check_bust()
-
-
-# if not game_over:
-#     if GAMBLER.hard_hand_value > DEALER.hard_hand_value:
-#         print 'Gambler Wins'
-#     else:
-#         print 'Dealer Wins!'
-
-# If not, gambler can hit or stay
-# if hit:
-#     give new card
-#     see if they win or bust
-#     continue
-# if stay:
-#     give dealer cards until at least 17
-#     see if dealer bust or win
-#     if not bust or 21:
-#         check if dealer or player higher
-
-
-# print 'Deck INFO'
-# DECK = Deck()
-# DECK.print_deck()
-# DECK.shuffle_deck()
-# print
-
-# print 'GAMBLER INFO'
-# GAMBLER = Gambler()
-# GAMBLER.ask_hit()
-# GAMBLER.ask_hit()
-# GAMBLER.print_current_hand_and_value()
-# GAMBLER.calc_hand_value()
-# GAMBLER.check_win_or_bust()
-
-
-# print 'DEALER INFO'
-# DEALER = Dealer()
-# DEALER.ask_hit()
-# DEALER.ask_hit()
-# DEALER.print_current_hand_and_value()
-# DEALER.check_win_or_bust()
-
-
-
-# print 'Logic printout:'
-
-# while not GAMBLER.check_win_or_bust():
-#     GAMBLER.player_turn()
 
 
 
@@ -400,31 +303,10 @@ else:
 
 
 
-# print
-# print
-# print 'Deck INFO'
-# DECK = Deck()
-# DECK.print_deck()
-# DECK.shuffle_deck()
-# print
-# print
-#
-# print 'Gambler INFO'
-# G = Gambler()
-# G.add_bankroll(40)
-# print G.bankroll
-# G.ask_hit()
-# G.ask_hit()
-# DECK.print_deck()
-# print G.current_hand
-# G.calc_hand_value()
-# print
-# print
-#
-# print 'Dealer INFO'
-# Dealy = Dealer()
-# Dealy.ask_hit()
-# Dealy.ask_hit()
-# DECK.print_deck()
-# print Dealy.current_hand
-# Dealy.calc_hand_value()
+
+
+
+
+
+
+

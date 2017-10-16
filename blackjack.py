@@ -52,7 +52,7 @@ class Player(object):
 
     def print_current_hand_and_value(self):
         self.calc_hand_value()
-        print self.__class__.__name__, 'current hand is:', ', '.join(self.current_hand)
+        print self.__class__.__name__, 'hand contains:', ', '.join(self.current_hand)
         if self.soft_hand_value != self.hard_hand_value:
             print self.__class__.__name__, 'hand has a Soft Value of', self.soft_hand_value, 'and a Hard Value of', self.hard_hand_value
         else:
@@ -86,7 +86,7 @@ class Player(object):
 
     def check_bust(self):
         global game_over
-        if self.soft_hand_value > 21 or self.hard_hand_value > 21:
+        if self.soft_hand_value > 21:
             print self.__class__.__name__, 'is bust! - from check bust'
             game_over = True
             return True
@@ -95,6 +95,8 @@ class Player(object):
 
     def check_highest_hand(self):
         global winner
+        print
+        print 'Final score.. \nDealer: %s \nGambler: %s' % (DEALER.hard_hand_value, GAMBLER.hard_hand_value)
         if GAMBLER.hard_hand_value == DEALER.hard_hand_value:
             print 'Tied hand!'
             winner = 'Nobody!'
@@ -130,14 +132,15 @@ class Gambler(Player):
 
     def gambler_turn(self):
         global gambler_turn_over
-        GAMBLER.print_bankroll()
+        # GAMBLER.print_bankroll()
+        print
         ask_player = raw_input('Hit or Stay?')
         if ask_player == 'hit':
             self.deal_card()
             self.print_current_hand_and_value()
             return True
         elif ask_player == 'stay':
-            print 'Dealers turn! \nHere is the final Gambler hand'
+            print 'Here is the final Gambler hand...'
             self.print_current_hand_and_value()
             gambler_turn_over = True
             return False
@@ -156,8 +159,11 @@ class Dealer(Player):
     def dealer_turn(self):
         global game_over
         global dealer_turn_over
-        while self.soft_hand_value < 17 and self.hard_hand_value < 17:
+        print '\nDealers turn..'
+        if self.soft_hand_value < 17 or (self.hard_hand_value < 17 and self.hard_hand_value > 20):
+            print 'Dealer needs to draw a card'
             self.deal_card()
+            DEALER.print_current_hand_and_value()
             return True
         # elif self.soft_hand_value == 21 or self.hard_hand_value == 21:
         #     self.print_current_hand_and_value()
@@ -168,6 +174,7 @@ class Dealer(Player):
             # self.print_current_hand_and_value()
             # game_over = True
             # print 'dealer reached at least 17'
+            print 'Dealer does not need to draw a card'
             dealer_turn_over = True
             return False
 
@@ -223,41 +230,47 @@ elif DEALER.check_bust():
 # Main logic - If nobody wins on Open
 
 while not game_over:
-    while not gambler_turn_over:
-        GAMBLER.gambler_turn()
 
+    while not gambler_turn_over:
         if GAMBLER.check_win():
-            print 'Gambler wins NOT ON OPEN'
             gambler_turn_over = True
             game_over = True
             winner = 'GAMBLER'
+            print
+            print 'Gambler hits 21!!'
         elif GAMBLER.check_bust():
-            print 'Gambler busts NOT ON OPEN'
             winner = 'DEALER'
+            print
+            print 'Gambler hits bust!!!'
             gambler_turn_over = True
             game_over = True
         else:
-            print 'meow'
+            GAMBLER.gambler_turn()
 
-    if not GAMBLER.check_win() and not GAMBLER.check_bust():
+    if not game_over:
         while not dealer_turn_over:
-            DEALER.dealer_turn()
-            DEALER.print_current_hand_and_value()
             if DEALER.check_win():
-                print 'Dealer wins NOT ON OPEN'
+                print
                 winner = 'DEALER'
+                print 'Dealer hits 21!!'
                 dealer_turn_over = True
                 game_over = True
             elif DEALER.check_bust():
-                print 'Dealer busts NOT ON OPEN'
-                winner = 'GAMBLER'
+                print
+                winner = 'Gambler'
+                print 'Dealer hits bust!!'
                 dealer_turn_over = True
                 game_over = True
             else:
-                GAMBLER.check_highest_hand()
-                game_over = True
+                DEALER.dealer_turn()
 
 
+    if not game_over:
+        DEALER.check_highest_hand()
+        game_over = True
+
+print
+print
 print 'Winner of the hand is %s' % winner
 
 

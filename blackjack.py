@@ -145,7 +145,6 @@ class Player(object):
         """
         global GAME_OVER
         if self.soft_hand_value > 21:
-            print self.__class__.__name__, 'is bust!'
             GAME_OVER = True
             return True
         else:
@@ -292,6 +291,10 @@ def check_winning_hand(gam, deal):
     elif deal.soft_hand_value > gam.soft_hand_value and deal.soft_hand_value < 21:
         deal.winner = True
 
+def reset_game():
+    GAME_OVER = False
+
+
 
 # End Classes
 
@@ -301,9 +304,6 @@ print
 print "Let's play BlackJack!"
 print
 print
-GAME_OVER = False
-GAMBLER_TURN_OVER = False
-DEALER_TURN_OVER = False
 # Create Deck and shuffle
 DECK = Deck()
 DECK.shuffle_deck()
@@ -311,7 +311,10 @@ DECK.shuffle_deck()
 GAMBLER = Gambler()
 DEALER = Dealer()
 
-
+# Reset Wins
+GAME_OVER = False
+GAMBLER_TURN_OVER = False
+DEALER_TURN_OVER = False
 # Reset Winners
 GAMBLER.winner = False
 DEALER.winner = False
@@ -364,10 +367,14 @@ if not GAME_OVER:
             DEALER.winner = True
             DEALER_TURN_OVER = True
             GAME_OVER = True
+            print
+            print 'Dealer hits 21!!'
         elif DEALER.check_bust():
             GAMBLER.winner = True
             DEALER_TURN_OVER = True
             GAME_OVER = True
+            print
+            print 'Dealer hits bust!!!'
         else:
             DEALER.dealer_turn()
 

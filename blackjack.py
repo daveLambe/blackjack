@@ -48,7 +48,8 @@ class Deck(object):
 
     def remove_dealt_card(self):
         """
-        Removes the first card in deck. Only used after dealing, therefore removing the dealt card from deck.
+        Removes the first card in deck. Only used after dealing,
+        therefore removing the dealt card from deck.
         :return:
         """
         del self.deck_of_cards[0]
@@ -60,7 +61,8 @@ class Player(object):
     Has attributes and methods used by both
     """
 
-    def __init__(self, current_hand=[], soft_hand_value=0, hard_hand_value=0, hit=False, stand=False):
+    def __init__(self, current_hand=[], soft_hand_value=0, hard_hand_value=0,
+                 hit=False, stand=False, winner=False):
         """
         init for Base Player Class - (Gambler & Dealer)
         :param current_hand: Current cards in hand - List
@@ -74,6 +76,7 @@ class Player(object):
         self.hard_hand_value = hard_hand_value
         self.hit = hit
         self.stand = stand
+        self.winner = winner
 
 # Methods
 
@@ -88,14 +91,16 @@ class Player(object):
 
     def print_current_hand_and_value(self):
         """
-        Calls method to calc hand value, then prints out all cards in current hand and the value of the hand
+        Calls method to calc hand value,
+        then prints out all cards in current hand and the value of the hand
         If you have an Ace, it will show soft & hard value
         :return:
         """
         self.calc_hand_value()
         print self.__class__.__name__, 'hand contains:', ', '.join(self.current_hand)
         if self.soft_hand_value != self.hard_hand_value:
-            print self.__class__.__name__, 'hand has a Soft Value of', self.soft_hand_value, 'and a Hard Value of', self.hard_hand_value
+            print self.__class__.__name__, 'hand has a Soft Value of', \
+                self.soft_hand_value, 'and a Hard Value of', self.hard_hand_value
         else:
             print self.__class__.__name__, 'hand has a value of:', self.hard_hand_value
 
@@ -127,7 +132,7 @@ class Player(object):
         #     players hard hand value = players soft hand value
         global GAME_OVER
         if self.soft_hand_value == 21 or self.hard_hand_value == 21:
-            print self.__class__.__name__, 'has won!'
+            self.winner = True
             GAME_OVER = True
             return True
         else:
@@ -149,42 +154,25 @@ class Player(object):
     def check_use_hard_or_soft(self):
         """
         Determines if you should/can use soft or hard hand value.
-        If your hard and soft value are different (And hard value will not make you bust), then you want to use hard value.
-        In this case, your hard value becomes your hard and soft value and you can try use it to win.
+        If your hard and soft value are different (And hard value will not make you bust),
+         then you want to use hard value.
+        In this case, your hard value becomes your hard and soft value,
+        you can try use it to win.
         :return:
         """
         print
         if self.soft_hand_value != self.hard_hand_value:
-            if self.hard_hand_value < 21:
+            if self.hard_hand_value < 22:
                 self.soft_hand_value = self.hard_hand_value
-
-    def check_winning_hand(self, gam, deal):
-        """
-        Checks tie or who won
-        :param gam:
-        :param deal:
-        :return:
-        """
-        global WINNER
-        print
-        print 'Final score.. \nDealer: %s \nGambler: %s' % (deal.soft_hand_value, gam.soft_hand_value)
-        if gam.soft_hand_value == deal.soft_hand_value:
-            print 'Tied hand!'
-            WINNER = 'Nobody!'
-        elif gam.soft_hand_value > deal.soft_hand_value:
-            print 'Gambler wins by Higher Valued hand!'
-            WINNER = 'Gambler'
-        else:
-            print 'Dealer wins by Higher Valued hand!'
-            WINNER = 'Dealer'
 
 
 class Gambler(Player):
     """
     Subclass - Gambler
     """
-    def __init__(self, current_hand=[], soft_hand_value=0, hard_hand_value=0, hit=False, stand=False, bet_amount=5, bankroll=100):
-        Player.__init__(self, current_hand, soft_hand_value, hard_hand_value, hit, stand)
+    def __init__(self, current_hand=[], soft_hand_value=0, hard_hand_value=0,
+                 hit=False, stand=False, winner=False, bet_amount=5, bankroll=100):
+        Player.__init__(self, current_hand, soft_hand_value, hard_hand_value, hit, stand, winner)
         self.bankroll = bankroll
         self.bet_amount = bet_amount
 
@@ -240,7 +228,8 @@ class Dealer(Player):
     """
     Subclass - Dealer
     """
-    def __init__(self, current_hand=[], soft_hand_value=0, hard_hand_value=0, hit=False, stand=False):
+    def __init__(self, current_hand=[], soft_hand_value=0, hard_hand_value=0,
+                 hit=False, stand=False, winner=False):
         """
         Creates Dealer subclass
         :param current_hand:
@@ -249,7 +238,7 @@ class Dealer(Player):
         :param hit:
         :param stand:
         """
-        Player.__init__(self, current_hand, soft_hand_value, hard_hand_value, hit, stand)
+        Player.__init__(self, current_hand, soft_hand_value, hard_hand_value, hit, stand, winner)
 
 
 # Methods
@@ -280,13 +269,33 @@ class Dealer(Player):
         else:
             print 'Dealer does not need to draw a card'
             DEALER_TURN_OVER = True
-            return False
+            return True
+        # Just changed the above value from true to false, might have to change back
+
+# Functions
+
+
+def check_winning_hand(gam, deal):
+    """
+    Checks tie or who won
+    :param gam:
+    :param deal:
+    :return:
+    """
+    GAMBLER.check_use_hard_or_soft()
+    DEALER.check_use_hard_or_soft()
+    print
+    print 'Final score.. \nDealer: %s \nGambler: %s' % (deal.soft_hand_value, gam.soft_hand_value)
+
+    if gam.soft_hand_value > deal.soft_hand_value and gam.soft_hand_value < 21:
+        gam.winner = True
+    elif deal.soft_hand_value > gam.soft_hand_value and deal.soft_hand_value < 21:
+        deal.winner = True
 
 
 # End Classes
 
 # Sudo Main logic - Start Game
-
 print
 print
 print "Let's play BlackJack!"
@@ -295,19 +304,23 @@ print
 GAME_OVER = False
 GAMBLER_TURN_OVER = False
 DEALER_TURN_OVER = False
-WINNER = 'blank'
 # Create Deck and shuffle
 DECK = Deck()
 DECK.shuffle_deck()
-# Create Gambler, Deal 2 cards
+# Create Gambler & Dealer
 GAMBLER = Gambler()
-GAMBLER.deal_card()
-GAMBLER.deal_card()
-
-# Create Dealer, Deal 2 cards
 DEALER = Dealer()
+
+
+# Reset Winners
+GAMBLER.winner = False
+DEALER.winner = False
+# Give Cards
+GAMBLER.deal_card()
+GAMBLER.deal_card()
 DEALER.deal_card()
 DEALER.deal_card()
+
 
 GAMBLER.print_current_hand_and_value()
 print
@@ -317,59 +330,64 @@ print
 # Main logic - Check for WIN on OPEN
 
 if GAMBLER.check_win():
-    print 'Gambler gets BlackJack on open!'
+    print 'Gambler gets a BlackJack on open!'
     GAME_OVER = True
-    WINNER = 'Gambler'
+    GAMBLER.winner = True
 elif DEALER.check_win():
-    print 'Dealer gets BlackJack on open!'
+    print 'Dealer gets a BlackJack on open!'
     GAME_OVER = True
-    WINNER = 'Dealer'
+    DEALER.winner = True
 
 
 # Main logic - If nobody wins on Open
-
+# Player turns
 if not GAME_OVER:
     while not GAMBLER_TURN_OVER:
         if GAMBLER.check_win():
             GAMBLER_TURN_OVER = True
             GAME_OVER = True
-            WINNER = 'GAMBLER'
+            GAMBLER.winner = True
             print
             print 'Gambler hits 21!!'
         elif GAMBLER.check_bust():
-            WINNER = 'DEALER'
+            DEALER.winner = True
             print
             print 'Gambler hits bust!!!'
             GAMBLER_TURN_OVER = True
+            DEALER_TURN_OVER = True
             GAME_OVER = True
         else:
             GAMBLER.gambler_turn()
 
-if not GAME_OVER:
     while not DEALER_TURN_OVER:
         if DEALER.check_win():
-            print
-            WINNER = 'DEALER'
-            print 'Dealer hits 21!!'
+            DEALER.winner = True
             DEALER_TURN_OVER = True
             GAME_OVER = True
         elif DEALER.check_bust():
-            print
-            WINNER = 'Gambler'
-            print 'Dealer hits bust!!'
+            GAMBLER.winner = True
             DEALER_TURN_OVER = True
             GAME_OVER = True
         else:
             DEALER.dealer_turn()
 
+# Check Winner/Tie
+check_winning_hand(GAMBLER, DEALER)
+if GAMBLER.winner and DEALER.winner:
+    print 'Gambler and Dealer Tie on 21!!!'
+elif GAMBLER.winner:
+    print 'Winner of the hand is Gambler!'
+elif DEALER.winner:
+    print 'Winner of the hand is Dealer!'
+elif GAMBLER.check_bust():
+    print 'Gambler went bust!'
+elif DEALER.check_bust():
+    print 'Dealer went bust!'
 # Main logic - Nobody wins or busts - Check Highest Hand Value and declare Winner!
-
-if not GAME_OVER:
-    GAMBLER.check_use_hard_or_soft()
-    DEALER.check_use_hard_or_soft()
-    GAMBLER.check_winning_hand(GAMBLER, DEALER)
-    GAME_OVER = True
-
-print
-print
-print 'Winner of the hand is %s' % WINNER
+elif not GAME_OVER:
+    if GAMBLER.winner:
+        print 'Winner of the hand is Gambler!'
+    elif DEALER.winner:
+        print 'Winner of the hand is Dealer!'
+    else:
+        print 'Winner of the hand is NOBODY!!!!'

@@ -99,10 +99,10 @@ class Player(object):
         self.calc_hand_value()
         print self.__class__.__name__, 'hand contains:', ', '.join(self.current_hand)
         if self.soft_hand_value != self.hard_hand_value:
-            print self.__class__.__name__, 'hand has a Soft Value of', \
-                self.soft_hand_value, 'and a Hard Value of', self.hard_hand_value
+            print self.__class__.__name__, 'hand has Soft Value:', \
+                self.soft_hand_value, 'and Hard Value:', self.hard_hand_value
         else:
-            print self.__class__.__name__, 'hand has a value of:', self.hard_hand_value
+            print self.__class__.__name__, 'hand value:', self.hard_hand_value
 
     def calc_hand_value(self):
         """
@@ -112,7 +112,10 @@ class Player(object):
         self.soft_hand_value = 0
         self.hard_hand_value = 0
         for i in range(len(self.current_hand)):
-            if self.current_hand[i][0].isdigit():
+            if self.current_hand[i][0:2] == '10':
+                self.soft_hand_value += 10
+                self.hard_hand_value += 10
+            elif self.current_hand[i][0].isdigit():
                 self.soft_hand_value += int(self.current_hand[i][0])
                 self.hard_hand_value += int(self.current_hand[i][0])
             elif self.current_hand[i][0] == 'A':
@@ -193,7 +196,7 @@ class Gambler(Player):
         print
         print
 
-    def add_bankroll(self, new_bankroll):
+    def change_bankroll(self, new_bankroll):
         """
         Adds to Gamblers bankroll
         :param new_bankroll:
@@ -209,13 +212,19 @@ class Gambler(Player):
         """
         self.bet_amount = new_bet_amount
 
+    def bankroll_win(self):
+        self.bankroll += self.bet_amount * 2
+
+    def bankroll_lose(self):
+        self.bankroll -= self.bet_amount
+
     def gambler_turn(self):
         """
         Goes through flow of gamblers turn
         :return:
         """
         global GAMBLER_TURN_OVER
-        # GAMBLER.print_bankroll()
+        GAMBLER.print_bankroll()
         print
         ask_player = raw_input('Hit or Stay?').lower()
         if ask_player == 'hit':
@@ -290,7 +299,8 @@ def check_winning_hand(gam, deal):
     GAMBLER.check_use_hard_or_soft()
     DEALER.check_use_hard_or_soft()
     print
-    print 'Final score.. \nDealer: %s \nGambler: %s' % (deal.soft_hand_value, gam.soft_hand_value)
+    print 'Final score.. \nDealer: %s \nGambler: %s'\
+          % (deal.soft_hand_value, gam.soft_hand_value)
 
     if gam.soft_hand_value > deal.soft_hand_value and gam.soft_hand_value < 21:
         gam.winner = True
@@ -386,31 +396,27 @@ while PLAY_AGAIN:
             else:
                 DEALER.dealer_turn()
 
-    # Check Winner/Tie
+    # Main logic - Nobody wins or busts - Check Highest Hand Value and declare Winner!
     check_winning_hand(GAMBLER, DEALER)
     if GAMBLER.winner and DEALER.winner:
         print 'Gambler and Dealer Tie on 21!!!'
     elif GAMBLER.winner:
         print 'Winner of the hand is Gambler!'
+        GAMBLER.bankroll_win()
+        GAMBLER.print_bankroll()
     elif DEALER.winner:
         print 'Winner of the hand is Dealer!'
-    elif GAMBLER.check_bust():
-        print 'Gambler went bust!'
-    elif DEALER.check_bust():
-        print 'Dealer went bust!'
-    # Main logic - Nobody wins or busts - Check Highest Hand Value and declare Winner!
-    elif not GAME_OVER:
-        if GAMBLER.winner:
-            print 'Winner of the hand is Gambler!'
-        elif DEALER.winner:
-            print 'Winner of the hand is Dealer!'
-        else:
-            print 'Winner of the hand is NOBODY!!!!'
+        GAMBLER.bankroll_lose()
+        GAMBLER.print_bankroll()
+    else:
+        print 'Winner of the hand is NOBODY!!!!'
+        GAMBLER.print_bankroll()
     print
     print
 
+# Ask User if they want to play again
     play_again = raw_input(
-        'Wanna play another round?! Enter y/n'
+        'Play another hand?! Enter y/n'
     ).lower()
     if play_again == 'y':
         continue

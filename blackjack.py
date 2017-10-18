@@ -19,7 +19,7 @@ class Deck(object):
         """
         Uses list comprehension to make a deck of cards.
         """
-        values = range(2, 10) + ('Jack King Queen Ace').split()
+        values = range(2, 11) + ('Jack King Queen Ace').split()
         suits = 'Diamonds Clubs Spades Hearts'.split()
         self.deck_of_cards = ['%s of %s' % (v, s) for v in values for s in suits]
 
@@ -164,6 +164,12 @@ class Player(object):
             if self.hard_hand_value < 22:
                 self.soft_hand_value = self.hard_hand_value
 
+    def reset_player(self):
+        self.current_hand = []
+        self.winner = False
+        self.soft_hand_value = 0
+        self.hard_hand_value = 0
+
 
 class Gambler(Player):
     """
@@ -291,10 +297,14 @@ def check_winning_hand(gam, deal):
     elif deal.soft_hand_value > gam.soft_hand_value and deal.soft_hand_value < 21:
         deal.winner = True
 
+
 def reset_game():
+    global GAME_OVER
+    global GAMBLER_TURN_OVER
+    global DEALER_TURN_OVER
     GAME_OVER = False
-
-
+    GAMBLER_TURN_OVER = False
+    DEALER_TURN_OVER = False
 
 # End Classes
 
@@ -310,91 +320,101 @@ DECK.shuffle_deck()
 # Create Gambler & Dealer
 GAMBLER = Gambler()
 DEALER = Dealer()
+PLAY_AGAIN = True
 
-# Reset Wins
-GAME_OVER = False
-GAMBLER_TURN_OVER = False
-DEALER_TURN_OVER = False
-# Reset Winners
-GAMBLER.winner = False
-DEALER.winner = False
-# Give Cards
-GAMBLER.deal_card()
-GAMBLER.deal_card()
-DEALER.deal_card()
-DEALER.deal_card()
+while PLAY_AGAIN:
 
+    # Reset Wins
+    GAMBLER.reset_player()
+    DEALER.reset_player()
+    reset_game()
+    # Reset Winners
+    # Give Cards
+    GAMBLER.deal_card()
+    GAMBLER.deal_card()
+    DEALER.deal_card()
+    DEALER.deal_card()
 
-GAMBLER.print_current_hand_and_value()
-print
-DEALER.print_current_hand_and_value()
-print
+    GAMBLER.print_current_hand_and_value()
+    print
+    DEALER.print_current_hand_and_value()
+    print
 
-# Main logic - Check for WIN on OPEN
+    # Main logic - Check for WIN on OPEN
+    if GAMBLER.check_win():
+        print 'Gambler gets a BlackJack on open!'
+        GAME_OVER = True
+        GAMBLER.winner = True
+    elif DEALER.check_win():
+        print 'Dealer gets a BlackJack on open!'
+        GAME_OVER = True
+        DEALER.winner = True
 
-if GAMBLER.check_win():
-    print 'Gambler gets a BlackJack on open!'
-    GAME_OVER = True
-    GAMBLER.winner = True
-elif DEALER.check_win():
-    print 'Dealer gets a BlackJack on open!'
-    GAME_OVER = True
-    DEALER.winner = True
+    # Main logic - If nobody wins on Open
+    # Player turns
+    if not GAME_OVER:
+        while not GAMBLER_TURN_OVER:
+            if GAMBLER.check_win():
+                GAMBLER_TURN_OVER = True
+                GAME_OVER = True
+                GAMBLER.winner = True
+                print
+                print 'Gambler hits 21!!'
+            elif GAMBLER.check_bust():
+                DEALER.winner = True
+                print
+                print 'Gambler hits bust!!!'
+                GAMBLER_TURN_OVER = True
+                DEALER_TURN_OVER = True
+                GAME_OVER = True
+            else:
+                GAMBLER.gambler_turn()
 
+        while not DEALER_TURN_OVER:
+            if DEALER.check_win():
+                DEALER.winner = True
+                DEALER_TURN_OVER = True
+                GAME_OVER = True
+                print
+                print 'Dealer hits 21!!'
+            elif DEALER.check_bust():
+                GAMBLER.winner = True
+                DEALER_TURN_OVER = True
+                GAME_OVER = True
+                print
+                print 'Dealer hits bust!!!'
+            else:
+                DEALER.dealer_turn()
 
-# Main logic - If nobody wins on Open
-# Player turns
-if not GAME_OVER:
-    while not GAMBLER_TURN_OVER:
-        if GAMBLER.check_win():
-            GAMBLER_TURN_OVER = True
-            GAME_OVER = True
-            GAMBLER.winner = True
-            print
-            print 'Gambler hits 21!!'
-        elif GAMBLER.check_bust():
-            DEALER.winner = True
-            print
-            print 'Gambler hits bust!!!'
-            GAMBLER_TURN_OVER = True
-            DEALER_TURN_OVER = True
-            GAME_OVER = True
-        else:
-            GAMBLER.gambler_turn()
-
-    while not DEALER_TURN_OVER:
-        if DEALER.check_win():
-            DEALER.winner = True
-            DEALER_TURN_OVER = True
-            GAME_OVER = True
-            print
-            print 'Dealer hits 21!!'
-        elif DEALER.check_bust():
-            GAMBLER.winner = True
-            DEALER_TURN_OVER = True
-            GAME_OVER = True
-            print
-            print 'Dealer hits bust!!!'
-        else:
-            DEALER.dealer_turn()
-
-# Check Winner/Tie
-check_winning_hand(GAMBLER, DEALER)
-if GAMBLER.winner and DEALER.winner:
-    print 'Gambler and Dealer Tie on 21!!!'
-elif GAMBLER.winner:
-    print 'Winner of the hand is Gambler!'
-elif DEALER.winner:
-    print 'Winner of the hand is Dealer!'
-elif GAMBLER.check_bust():
-    print 'Gambler went bust!'
-elif DEALER.check_bust():
-    print 'Dealer went bust!'
-# Main logic - Nobody wins or busts - Check Highest Hand Value and declare Winner!
-elif not GAME_OVER:
-    if GAMBLER.winner:
+    # Check Winner/Tie
+    check_winning_hand(GAMBLER, DEALER)
+    if GAMBLER.winner and DEALER.winner:
+        print 'Gambler and Dealer Tie on 21!!!'
+    elif GAMBLER.winner:
         print 'Winner of the hand is Gambler!'
     elif DEALER.winner:
         print 'Winner of the hand is Dealer!'
-    else:
-        print 'Winner of the hand is NOBODY!!!!'
+    elif GAMBLER.check_bust():
+        print 'Gambler went bust!'
+    elif DEALER.check_bust():
+        print 'Dealer went bust!'
+    # Main logic - Nobody wins or busts - Check Highest Hand Value and declare Winner!
+    elif not GAME_OVER:
+        if GAMBLER.winner:
+            print 'Winner of the hand is Gambler!'
+        elif DEALER.winner:
+            print 'Winner of the hand is Dealer!'
+        else:
+            print 'Winner of the hand is NOBODY!!!!'
+    print
+    print
+
+    play_again = raw_input(
+        'Wanna play another round?! Enter y/n'
+    ).lower()
+    if play_again == 'y':
+        continue
+    elif play_again == 'n':
+        PLAY_AGAIN = False
+        print 'Laters'
+

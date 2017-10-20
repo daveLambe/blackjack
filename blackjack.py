@@ -179,7 +179,7 @@ class Gambler(Player):
     Subclass - Gambler
     """
     def __init__(self, current_hand=[], soft_hand_value=0, hard_hand_value=0,
-                 hit=False, stand=False, winner=False, bet_amount=5, bankroll=100):
+                 hit=False, stand=False, winner=False, bet_amount=5.0, bankroll=100.0):
         Player.__init__(self, current_hand, soft_hand_value, hard_hand_value, hit, stand, winner)
         self.bankroll = bankroll
         self.bet_amount = bet_amount
@@ -196,6 +196,10 @@ class Gambler(Player):
         print
         print
 
+    def print_current_bet(self):
+        print 'Current bet:', self.bet_amount
+        print
+
     def change_bankroll(self, new_bankroll):
         """
         Adds to Gamblers bankroll
@@ -210,10 +214,13 @@ class Gambler(Player):
         :param new_bet_amount:
         :return:
         """
-        self.bet_amount = new_bet_amount
+        self.bet_amount += new_bet_amount
 
     def bankroll_win(self):
-        self.bankroll += self.bet_amount * 2
+        if GAMBLER.soft_hand_value == 21:
+            self.bankroll += self.bet_amount * 2 + (self.bet_amount / 2)
+        else:
+            self.bankroll += self.bet_amount * 2
 
     def bankroll_lose(self):
         self.bankroll -= self.bet_amount
@@ -225,8 +232,9 @@ class Gambler(Player):
         """
         global GAMBLER_TURN_OVER
         GAMBLER.print_bankroll()
+        GAMBLER.print_current_bet()
         print
-        ask_player = raw_input('Hit or Stay?').lower()
+        ask_player = raw_input("Hit or Stay? \nType 'bet' at any point to raise the $5 opening by a multiple of 5 \n").lower()
         if ask_player == 'hit':
             self.deal_card()
             self.print_current_hand_and_value()
@@ -236,6 +244,33 @@ class Gambler(Player):
             self.print_current_hand_and_value()
             GAMBLER_TURN_OVER = True
             return False
+        elif ask_player == 'bet':
+            GAMBLER.ask__increase_bet()
+
+    def ask__increase_bet(self):
+        """
+        User selected 'bet' instead of hit or stay.
+        Allow user to add to opening $5 bet by multiples of five.
+        (Must have enough money in bankroll)
+        :param self:
+        :return:
+        """
+        ask_bet = int(raw_input("The standard bet is $5. Enter multiple of 5 to add to bet"
+                                 " \nType '0' to not add to bet \n"))
+        if ask_bet > self.bankroll:
+            print 'You do not have enough money in your bankroll. Please select a smaller amount'
+        elif ask_bet % 5 != 0:
+            print 'Please enter a multiple of 5'
+        elif ask_bet == 0:
+            print 'Bet cancelled'
+            self.bet_amount += ask_bet
+            GAMBLER.gambler_turn()
+        else:
+            self.bet_amount += ask_bet
+            print ask_bet, 'added to current bet \nCurrent bet:', self.bet_amount
+            print
+            self.print_current_hand_and_value()
+            GAMBLER.gambler_turn()
 
 
 class Dealer(Player):
@@ -314,6 +349,7 @@ def reset_game():
     global DEALER_TURN_OVER
     GAME_OVER = False
     GAMBLER_TURN_OVER = False
+    GAMBLER.bet_amount = 5
     DEALER_TURN_OVER = False
 
 # End Classes
@@ -342,6 +378,7 @@ while PLAY_AGAIN:
     # Give Cards
     GAMBLER.deal_card()
     GAMBLER.deal_card()
+    GAMBLER.bankroll_lose()
     DEALER.deal_card()
     DEALER.deal_card()
 
@@ -406,7 +443,6 @@ while PLAY_AGAIN:
         GAMBLER.print_bankroll()
     elif DEALER.winner:
         print 'Winner of the hand is Dealer!'
-        GAMBLER.bankroll_lose()
         GAMBLER.print_bankroll()
     else:
         print 'Winner of the hand is NOBODY!!!!'
@@ -423,4 +459,3 @@ while PLAY_AGAIN:
     elif play_again == 'n':
         PLAY_AGAIN = False
         print 'Laters'
-

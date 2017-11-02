@@ -21,7 +21,7 @@ class Deck(object):
         """
         values = range(2, 11) + ('Jack King Queen Ace').split()
         suits = 'Diamonds Clubs Spades Hearts'.split()
-        self.deck_of_cards = ['%s of %s' % (v, s) for v in values for s in suits]
+        self.deck_of_cards = ['{} of {}'.format(v, s) for v in values for s in suits]
 
     def print_deck(self):
         """
@@ -168,6 +168,10 @@ class Player(object):
                 self.soft_hand_value = self.hard_hand_value
 
     def reset_player(self):
+        """
+        Resets player values to be in correct state at the start of each hand
+        :return:
+        """
         self.current_hand = []
         self.winner = False
         self.soft_hand_value = 0
@@ -197,6 +201,10 @@ class Gambler(Player):
         print
 
     def print_current_bet(self):
+        """
+        Print current bet. Added since user now can now opt to bet more per hand
+        :return:
+        """
         print 'Current bet:', self.bet_amount
         print
 
@@ -217,12 +225,21 @@ class Gambler(Player):
         self.bet_amount += new_bet_amount
 
     def bankroll_win(self):
+        """
+        Updating Gambler bankroll upon win
+        Adjusts differently depending on Win by Highest hand or Win by Blackjack
+        :return:
+        """
         if GAMBLER.soft_hand_value == 21:
             self.bankroll += self.bet_amount * 2 + (self.bet_amount / 2)
         else:
             self.bankroll += self.bet_amount * 2
 
     def bankroll_lose(self):
+        """
+        Adjusts bankroll to subtract by current hand bet
+        :return:
+        """
         self.bankroll -= self.bet_amount
 
     def gambler_turn(self):
@@ -234,7 +251,8 @@ class Gambler(Player):
         GAMBLER.print_bankroll()
         GAMBLER.print_current_bet()
         print
-        ask_player = raw_input("Hit or Stay? \nType 'bet' at any point to raise the $5 opening by a multiple of 5 \n").lower()
+        ask_player = raw_input("Hit or Stay? \nType 'bet' at any point "
+                               "to raise the $5 opening by a multiple of 5 \n").lower()
         if ask_player == 'hit':
             self.deal_card()
             self.print_current_hand_and_value()
@@ -267,10 +285,22 @@ class Gambler(Player):
             GAMBLER.gambler_turn()
         else:
             self.bet_amount += ask_bet
+            self.bankroll -= ask_bet
             print ask_bet, 'added to current bet \nCurrent bet:', self.bet_amount
             print
             self.print_current_hand_and_value()
             GAMBLER.gambler_turn()
+
+    def check_gambler_broke(self):
+        """
+        Check if Gambler bankroll is zero, Gambler should no longer be able to bet at this point
+        :return:
+        """
+        global GAME_OVER
+        if self.bankroll < 1:
+            GAME_OVER = True
+            DEALER.winner = True
+
 
 
 class Dealer(Player):
@@ -344,6 +374,10 @@ def check_winning_hand(gam, deal):
 
 
 def reset_game():
+    """
+    Used to reset variables that will change following hand to desired state at start of hand
+    :return:
+    """
     global GAME_OVER
     global GAMBLER_TURN_OVER
     global DEALER_TURN_OVER
@@ -360,16 +394,17 @@ print
 print "Let's play BlackJack!"
 print
 print
-# Create Deck and shuffle
-DECK = Deck()
-DECK.shuffle_deck()
 # Create Gambler & Dealer
 GAMBLER = Gambler()
 DEALER = Dealer()
 PLAY_AGAIN = True
 
+
 while PLAY_AGAIN:
 
+    # Create Deck and shuffle
+    DECK = Deck()
+    DECK.shuffle_deck()
     # Reset Wins
     GAMBLER.reset_player()
     DEALER.reset_player()
@@ -388,6 +423,9 @@ while PLAY_AGAIN:
     print
 
     # Main logic - Check for WIN on OPEN
+    if GAMBLER.check_gambler_broke():
+        GAME_OVER = True
+        DEALER.winner = True
     if GAMBLER.check_win():
         print 'Gambler gets a BlackJack on open!'
         GAME_OVER = True
@@ -451,11 +489,11 @@ while PLAY_AGAIN:
     print
 
 # Ask User if they want to play again
-    play_again = raw_input(
+    PLAY_AGAIN = raw_input(
         'Play another hand?! Enter y/n'
     ).lower()
-    if play_again == 'y':
+    if PLAY_AGAIN == 'y':
         continue
-    elif play_again == 'n':
+    elif PLAY_AGAIN == 'n':
         PLAY_AGAIN = False
         print 'Laters'

@@ -244,6 +244,9 @@ class Game():
         return count
 
     def play(self):
+        """
+        TODO: Added the looping quickly here so it's messy, but you get the idea
+        """
         the_game.setup()
 
         buy_in = 5

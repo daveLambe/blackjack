@@ -21,7 +21,6 @@ class Card:
     def __repr__(self):
         return '{} of {}'.format(self.value, self.suit)
 
-
 class Deck:
     """
     A List of Cards, used both for the Players' hands and the game Deck
@@ -117,7 +116,7 @@ class Dealer(Player):
 
     def ___init__(self):
         Player.__init__()
-        self.active = True
+        self.active_this_turn = True
 
     def print_hand_and_value(self):
         print "Dealer's full hand: "
@@ -131,7 +130,8 @@ class Gambler(Player):
         Player.__init__(self)
         self.balance = cash
         self.current_bet = 0
-        self.active = True
+        self.active_this_turn = True
+        self.active_this_game = True
         self.player_number = player_number
 
     def print_hand_and_value(self):
@@ -142,6 +142,7 @@ class Gambler(Player):
         self.balance += delta
 
     def ask_increase_bet(self):
+        print "Current Balance: {}".format(self.balance)
         answered = False
         while answered is False:
             ask_bet = int(raw_input("\nThe standard bet is $5. Enter multiple of 5 to add to bet"
@@ -161,41 +162,43 @@ class Gambler(Player):
                 answered = True
 
     def take_turn(self, current_dealer_card, deck):
-        self.print_hand_and_value()
-        print "\nDealer's Face-Up Card:"
-        print str(current_dealer_card)
         still_going = True
         while still_going is True:
-            ask_player = raw_input("\nOptions:\n\tType 'hit' for a card.\n\tType 'stay' to stick.\n\tType 'bet' to change your bet\n").lower()
-            print
-            if ask_player == 'hit':
-                card = deck.deal_card()
-                print "You got the " + str(card)
-                self.add_card_to_hand(card)
-                self.print_hand_and_value()
-                if self.get_value_to_use() > 21:
-                    still_going = False
-                    self.lose()
-                if self.get_value_to_use() == 21:
-                    still_going = False
-                    self.win()
-            elif ask_player == 'stay':
+            self.print_hand_and_value()
+            if self.get_value_to_use() > 21:
                 still_going = False
-            elif ask_player == 'bet':
-                self.ask_increase_bet()
+                self.lose()
+            elif self.get_value_to_use() == 21:
+                still_going = False
+                self.win()
             else:
-                print "Input not recognised."
+                print "\nDealer's Face-Up Card:"
+                print str(current_dealer_card)
+                ask_player = raw_input("\nOptions:\n\tType 'hit' for a card.\n\tType 'stay' to stick.\n\tType 'bet' to change your bet\n").lower()
+                print
+                if ask_player == 'hit':
+                    print "\n\n\n\n---------------------- HIT! ----------------------\n\n\n\n"
+                    card = deck.deal_card()
+                    print "You got the " + str(card)
+                    self.add_card_to_hand(card)
+                elif ask_player == 'stay':
+                    print "\n\n\n\n---------------------- Stay! ----------------------\n\n\n\n"
+                    still_going = False
+                elif ask_player == 'bet':
+                    self.ask_increase_bet()
+                else:
+                    print "Input not recognised."
 
     def win(self):
-        print "Player {} Wins! :D".format(self.player_number)
-        self.active = False
-        self.change_balance_by(self.current_bet)
+        self.active_this_turn = False
+        self.change_balance_by(self.current_bet * 2)
+        print "Player {} Wins {}! Balance now: {} :D".format(self.player_number, self.current_bet * 2, self.balance)
         self.current_bet = 0
 
     def lose(self):
-        print "Player {} Loses! D:".format(self.player_number)
-        self.active = False
+        self.active_this_turn = False
         self.change_balance_by(self.current_bet * -1)
+        print "Player {} Loses {}! Balance now: {} D:".format(self.player_number, self.current_bet, self.balance)
         self.current_bet = 0
 
 class Game():
@@ -226,37 +229,77 @@ class Game():
         for i in range(len(self.players)):
             self.players[i].clear_hand()
 
-    def get_num_active_players(self):
+    def get_num_active_players_turn(self):
         count = 0
         for p in self.players:
-            if p.active:
+            if p.active_this_turn:
+                count += 1
+        return count
+
+    def get_num_active_players_game(self):
+        count = 0
+        for p in self.players:
+            if p.active_this_game:
                 count += 1
         return count
 
     def play(self):
         the_game.setup()
-        for i in [1, 2]:
+
+        buy_in = 5
+        still_playing = True
+
+        while self.get_num_active_players_game() > 0:
             for p in self.players:
-                p.add_card_to_hand(self.deck.deal_card())
+                if p.balance >= buy_in:
+                    p.clear_hand()
+                    p.current_bet = buy_in
+                    p.balance -= buy_in
+                    p.add_card_to_hand(self.deck.deal_card())
+                    p.add_card_to_hand(self.deck.deal_card())
+                    p.active_this_turn = True
+                else:
+                    print "Player {} doesn't have enough to play.".format(p.player_number)
+                    p.active_this_game = False
+            self.dealer.clear_hand()
+            self.dealer.add_card_to_hand(self.deck.deal_card())
             self.dealer.add_card_to_hand(self.deck.deal_card())
 
+            for i in range(len(self.players)):
+                if self.players[i].active_this_game is True:
+                    print "---------------------------"
+                    print "---------------------------"
+                    print "---------------------------"
+                    print "---------------------------"
+                    print "\nPlayer {}'s turn! Balance: {}, Bet: {}\n".format(i+1, self.players[i].balance, self.players[i].current_bet)
+                    print "---------------------------"
+                    print "---------------------------"
+                    print "---------------------------"
+                    print "---------------------------"
+                    self.players[i].take_turn(self.dealer.get_faceup_card(), self.deck)
 
-        for i in range(len(self.players)):
-            print "\n\n\nPlayer {}'s turn!\n".format(i+1)
-            self.players[i].take_turn(self.dealer.get_faceup_card(), self.deck)
-        
-        if self.get_num_active_players() > 0:
-            self.dealer.print_hand_and_value()
 
-        for i in range(len(self.players)):
-            if self.players[i].active is True:
-                player_score = self.players[i].get_value_to_use()
-                dealer_score = self.dealer.get_value_to_use()
-                print "Player: {} | Dealer: {}".format(player_score, dealer_score)
-                if player_score > dealer_score:
-                    self.players[i].win()
-                else:
-                    self.players[i].lose()
+            if self.get_num_active_players_turn() > 0:
+                self.dealer.print_hand_and_value()
+                for i in range(len(self.players)):
+                    if self.players[i].active_this_turn is True:
+                        player_score = self.players[i].get_value_to_use()
+                        dealer_score = self.dealer.get_value_to_use()
+                        dealer_rolling = True
+                        while dealer_score <= 16 and dealer_rolling is True:
+                            card = self.deck.deal_card()
+                            print "Dealer gets " + str(card)
+                            self.dealer.add_card_to_hand(card)
+                            dealer_score = self.dealer.get_value_to_use()
+                            if dealer_score > 21:
+                                dealer_rolling = False
+                                self.players[i].win()
+                        if dealer_score <= 21:
+                            print "Player: {} | Dealer: {}".format(player_score, dealer_score)
+                            if player_score > dealer_score:
+                                self.players[i].win()
+                            else:
+                                self.players[i].lose()
 
         print "Game Over!"
         self.game_over()

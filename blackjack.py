@@ -185,20 +185,41 @@ class Dealer(Player):
 
 class Game():
     def __init__(self):
-        print 'Meow'
+        self.d = Deck(2)
+        self.players = []
+        self.deal = Dealer()
 
-d = Deck(1)
-d.shuffle_deck()
+    def start_game(self):
+        self.d.shuffle()
+        ask_num_players = int(raw_input('Welcome to Blackjack! How many players? Select 1, 2, 3 or 4\n'))
+        ask_complete = False
+        while not ask_complete:
+            if ask_num_players.isdigit():
+                if ask_num_players > 0 and ask_num_players <= 4:
+                    ask_num_players = int(ask_num_players)
+                    ask_complete = True
+                else:
+                    print 'Invalid number. Enter 1-4 players'
+            else:
+                print 'Invalid input. Please enter number between 1-4'
+        for p in range(len(ask_num_players)):
+            players.append(Gambler(50, p+1))
+        print players
 
-gambler = Gambler(50, 1)
-gambler.add_card_to_hand(d.deal_card_from_deck())
-gambler.add_card_to_hand(d.deal_card_from_deck())
 
-dealer = Dealer()
-dealer.add_card_to_hand(d.deal_card_from_deck())
-dealer.add_card_to_hand(d.deal_card_from_deck())
 
-gambler.take_turn(dealer.get_faceup_card(), d)
+# d = Deck(1)
+# d.shuffle_deck()
+#
+# gambler = Gambler(50, 1)
+# gambler.add_card_to_hand(d.deal_card_from_deck())
+# gambler.add_card_to_hand(d.deal_card_from_deck())
+#
+# dealer = Dealer()
+# dealer.add_card_to_hand(d.deal_card_from_deck())
+# dealer.add_card_to_hand(d.deal_card_from_deck())
+#
+# gambler.take_turn(dealer.get_faceup_card(), d)
 
 
 

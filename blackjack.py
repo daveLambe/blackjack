@@ -177,8 +177,17 @@ class Gambler(Player):
 class Dealer(Player):
     def __init__(self):
         Player.__init__(self)
+        self.dealer_wins = False
         self.dealer_went_bust = False
         self.dealer_turn_over = False
+
+    def win(self):
+        if self.choose_hard_or_soft_value() == 21:
+            self.dealer_wins = True
+
+    def lose(self):
+        if self.choose_hard_or_soft_value() > 21:
+            self.dealer_went_bust = True
 
     def get_faceup_card(self):
         return self.hand[0]
@@ -189,14 +198,15 @@ class Dealer(Player):
         print '\nDealers hand value: {}'.format(self.choose_hard_or_soft_value())
 
     def dealer_take_turn(self, deck):
-        while self.choose_hard_or_soft_value() <= 16:
+        dealer_still_going = True
+        while dealer_still_going and self.choose_hard_or_soft_value() <= 16:
+            # while self.choose_hard_or_soft_value() <= 16:
             self.add_card_to_hand(deck.deal_card_from_deck())
             self.print_dealer_full_hand_and_value()
-        if self.choose_hard_or_soft_value() > 21:
-            self.lose()
-        elif self.choose_hard_or_soft_value() == 21:
-            self.win()
-
+            if self.choose_hard_or_soft_value() > 21:
+                dealer_still_going = False
+            elif self.choose_hard_or_soft_value() == 21:
+                dealer_still_going = False
 
 
 class Game:
@@ -265,19 +275,10 @@ class Game:
         print '<----------------->'
         self.deal.dealer_take_turn(self.d)
 
-        # for p in self.players:
-        #     if p.active_this_turn:
-        #         self.num_active_players += 1
-        #
-        # if self.num_active_players > 0:
-        #     print '<----------------->'
-        #     print '<----------------->'
-        #     print
-        #     print 'Dealers turn!'
-        #     print
-        #     print '<----------------->'
-        #     print '<----------------->'
-        #     self.deal.dealer_take_turn(self.d)
+        for p in self.players:
+            if p.active_this_turn:
+                if p.choose_hard_or_soft_value > self.deal.choose_hard_or_soft_value():
+                    print 'Player {} score: Dealer score: {}'.format(p.choose_hard_or_soft_value, self.deal.choose_hard_or_soft_value())
 
 
 

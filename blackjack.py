@@ -88,10 +88,10 @@ class Player:
         soft_value = self.get_soft_hand_value()
         hard_value = self.get_hard_hand_value()
         if hard_value == soft_value or hard_value > 21:
-            print 'Your hand value is {}'.format(self.get_soft_hand_value())
+            print '\nYour hand value is {}'.format(self.get_soft_hand_value())
         else:
-            print 'Your soft hand value is {} ' \
-                  'Your hard hand value is: {}'.format(self.get_soft_hand_value(), self.get_hard_hand_value())
+            print '\nYour soft hand value is {} ' \
+                  '\nYour hard hand value is: {}'.format(self.get_soft_hand_value(), self.get_hard_hand_value())
 
 
 class Gambler(Player):
@@ -115,7 +115,7 @@ class Gambler(Player):
             self.bank -= self.current_bet
 
     def print_hand_and_value(self):
-        print "Player {}'s full hand:".format(self.player_number)
+        print "\nPlayer {}'s full hand:".format(self.player_number)
         Player.print_hand_and_value(self)
 
     def add_to_bet(self):
@@ -130,7 +130,6 @@ class Gambler(Player):
                 if ask_bet > self.bank:
                     print 'That is more than you have in your bank! Try again!'
                 elif ask_bet % 5 == 0 and ask_bet > 0:
-                    print self.current_bet
                     print 'You added {} to your current bet'.format(ask_bet)
                     self.current_bet += ask_bet
                     print 'Your current bet is now: {}'.format(self.current_bet)
@@ -158,8 +157,10 @@ class Gambler(Player):
                 # print 'Your current hand contains: {} \nValue" {}'.format(self.print_entire_hand(), self.choose_hard_or_soft_value())
                 ask_player_turn = raw_input("\nEnter your next move!\nOptions:\n\t'Hit'\n\t'Stay'\n\t'Bet' \n").lower()
                 if ask_player_turn == 'hit':
-                    card = self.add_card_to_hand(deck.deal_card_from_deck())
-                    print 'You got the {}'.format(card)
+                    # card = self.add_card_to_hand(self.deck.deal_card_from_deck())
+                    card = deck.deal_card_from_deck()
+                    print 'You got the {}!\n'.format(card)
+                    self.hand.append(card)
                 elif ask_player_turn == 'stay':
                     still_going = False
                 elif ask_player_turn == 'bet':

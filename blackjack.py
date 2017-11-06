@@ -148,10 +148,14 @@ class Gambler(Player):
             self.print_hand_and_value()
             if self.choose_hard_or_soft_value() > 21:
                 still_going = False
+                self.active_this_hand = False
                 self.lose()
+                print 'Player {} loses by bust!'.format(self.player_number)
             elif self.choose_hard_or_soft_value() == 21:
                 still_going = False
+                self.active_this_hand = False
                 self.win()
+                print 'Player {} wins at 21!'.format(self.player_number)
             else:
                 print '\nDealers face up card: {}'.format(dealer_faceup_card)
                 # print 'Your current hand contains: {} \nValue" {}'.format(self.print_entire_hand(), self.choose_hard_or_soft_value())
@@ -163,6 +167,7 @@ class Gambler(Player):
                     self.hand.append(card)
                 elif ask_player_turn == 'stay':
                     still_going = False
+                    self.active_this_hand = False
                 elif ask_player_turn == 'bet':
                     self.add_to_bet()
                 else:
@@ -183,30 +188,83 @@ class Dealer(Player):
         print '\nDealers hand value: {}'.format(self.choose_hard_or_soft_value())
 
 
-class Game():
+class Game:
     def __init__(self):
         self.d = Deck(2)
         self.players = []
         self.deal = Dealer()
+        self.num_active_players = 0
+        self.buy_in = 5
 
     def start_game(self):
-        self.d.shuffle()
-        ask_num_players = int(raw_input('Welcome to Blackjack! How many players? Select 1, 2, 3 or 4\n'))
+        self.d.shuffle_deck()
         ask_complete = False
         while not ask_complete:
+            ask_num_players = raw_input('\nWelcome to Blackjack! How many players? \nSelect 1, 2, 3 or 4\n')
             if ask_num_players.isdigit():
-                if ask_num_players > 0 and ask_num_players <= 4:
-                    ask_num_players = int(ask_num_players)
+                if int(ask_num_players) > 0 and int(ask_num_players) <= 4:
+                    self.num_active_players = int(ask_num_players)
                     ask_complete = True
                 else:
-                    print 'Invalid number. Enter 1-4 players'
+                    print 'Choose number between 1 and 4'
             else:
                 print 'Invalid input. Please enter number between 1-4'
-        for p in range(len(ask_num_players)):
-            players.append(Gambler(50, p+1))
-        print players
+        for p in range(self.num_active_players):
+            self.players.append(Gambler(50, p+1))
+
+        the_game.play()
+
+    def play(self):
+        for p in self.players:
+            if p.bank < 5:
+                print 'Player {} does not have enough money to play!'.format(p.player_number)
+                p.active_this_game = False
+            else:
+                p.clear_hand()
+                p.bank -= self.buy_in
+                p.current_bet += self.buy_in
+                p.add_card_to_hand(self.d.deal_card_from_deck())
+                p.add_card_to_hand(self.d.deal_card_from_deck())
+                self.deal.clear_hand()
+                self.deal.add_card_to_hand(self.d.deal_card_from_deck())
+
+        for p in self.players:
+            if p.active_this_game:
+                print
+                print
+                print '<----------------->'
+                print '<----------------->'
+                print '<----------------->'
+                print '<----------------->'
+                print
+                print "Player {}'s turn!".format(p.player_number)
+                print
+                print '<----------------->'
+                print '<----------------->'
+                print '<----------------->'
+                print '<----------------->'
+                p.take_turn(self.deal.get_faceup_card(), self.d)
 
 
+
+
+
+
+# This will run every time a hand is played
+# Check if players have enough money to play
+# If not, take them out of active players?
+# If so, reduce bank by buy in
+# deal 2 cards to each player
+# deal one faceup card to dealer
+# Ask each player to play
+# make dealer play
+# assess immediate wins/losses
+# assess win by higher number for all players & dealer
+# print out all winners
+
+
+the_game = Game()
+the_game.start_game()
 
 # d = Deck(1)
 # d.shuffle_deck()

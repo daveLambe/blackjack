@@ -114,6 +114,10 @@ class Gambler(Player):
             self.active_this_hand = False
             self.bank -= self.current_bet
 
+    def print_hand_and_value(self):
+        print "Player {}'s full hand:".format(self.player_number)
+        Player.print_hand_and_value(self)
+
     def add_to_bet(self):
         if self.bank < 5:
             print "You don't have any more money to bet!"
@@ -150,9 +154,9 @@ class Gambler(Player):
                 still_going = False
                 self.win()
             else:
-                print 'Dealers face up card: {}'.format(dealer_faceup_card)
-                print 'Your current hand contains: {} \nValue" {}'.format(self.print_entire_hand(), self.choose_hard_or_soft_value())
-                ask_player_turn = raw_input("Enter your next move\nOptions:\n\t'Hit'\n\t'Stay'\n\t'Bet' \n").lower()
+                print '\nDealers face up card: {}'.format(dealer_faceup_card)
+                # print 'Your current hand contains: {} \nValue" {}'.format(self.print_entire_hand(), self.choose_hard_or_soft_value())
+                ask_player_turn = raw_input("\nEnter your next move!\nOptions:\n\t'Hit'\n\t'Stay'\n\t'Bet' \n").lower()
                 if ask_player_turn == 'hit':
                     card = self.add_card_to_hand(deck.deal_card_from_deck())
                     print 'You got the {}'.format(card)

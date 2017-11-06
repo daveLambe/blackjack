@@ -203,14 +203,13 @@ class Game:
             ask_num_players = raw_input('\nWelcome to Blackjack! How many players? \nSelect 1, 2, 3 or 4\n')
             if ask_num_players.isdigit():
                 if int(ask_num_players) > 0 and int(ask_num_players) <= 4:
-                    self.num_active_players = int(ask_num_players)
-                    ask_complete = True
+                    for p in range(int(ask_num_players)):
+                        self.players.append(Gambler(50, p + 1))
+                        ask_complete = True
                 else:
                     print 'Choose number between 1 and 4'
             else:
                 print 'Invalid input. Please enter number between 1-4'
-        for p in range(self.num_active_players):
-            self.players.append(Gambler(50, p+1))
 
         the_game.play()
 

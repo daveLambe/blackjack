@@ -5,6 +5,7 @@ Dealer hits on 17!
 
 Authors: DL, ML
 """
+# todo - Make Ace + facecard ONLY == 21.1. and lose is >= 22 (Ace and face card alone wins above all else)
 from random import shuffle
 
 
@@ -158,11 +159,10 @@ class Gambler(Player):
                 print 'Player {} wins at 21!'.format(self.player_number)
             else:
                 print '\nDealers face up card: {}'.format(dealer_faceup_card)
-                # print 'Your current hand contains: {} \nValue" {}'.format(self.print_entire_hand(), self.choose_hard_or_soft_value())
                 ask_player_turn = raw_input("\nEnter your next move!\nOptions:\n\t'Hit'\n\t'Stay'\n\t'Bet' \n").lower()
                 if ask_player_turn == 'hit':
-                    # card = self.add_card_to_hand(self.deck.deal_card_from_deck())
                     card = deck.deal_card_from_deck()
+                    print
                     print 'You got the {}!\n'.format(card)
                     self.hand.append(card)
                 elif ask_player_turn == 'stay':
@@ -200,13 +200,16 @@ class Dealer(Player):
     def dealer_take_turn(self, deck):
         dealer_still_going = True
         while dealer_still_going and self.choose_hard_or_soft_value() <= 16:
-            # while self.choose_hard_or_soft_value() <= 16:
-            self.add_card_to_hand(deck.deal_card_from_deck())
+            dealer_new_card = deck.deal_card_from_deck()
+            print 'Dealer drew: {}'.format(str(dealer_new_card))
+            self.add_card_to_hand(dealer_new_card)
             self.print_dealer_full_hand_and_value()
             if self.choose_hard_or_soft_value() > 21:
+                print 'Dealer busts!'
                 dealer_still_going = False
             elif self.choose_hard_or_soft_value() == 21:
                 dealer_still_going = False
+                print 'Dealer hits 21!'
 
 
 class Game:
@@ -256,7 +259,7 @@ class Game:
                 print '<----------------->'
                 print '<----------------->'
                 print
-                print "Player {}'s turn!".format(p.player_number)
+                print "Player {}'s turn! Bank: {}".format(p.player_number, p.bank)
                 print
                 print '<----------------->'
                 print '<----------------->'
@@ -264,6 +267,8 @@ class Game:
                 print '<----------------->'
                 p.take_turn(self.deal.get_faceup_card(), self.d)
 
+        print
+        print
         print '<----------------->'
         print '<----------------->'
         print
@@ -272,6 +277,10 @@ class Game:
         print '<----------------->'
         print '<----------------->'
         self.deal.dealer_take_turn(self.d)
+
+the_game = Game()
+the_game.setup_game()
+
 
 
 """
@@ -311,8 +320,7 @@ for p in player:
 # print out all winners
 
 
-the_game = Game()
-the_game.setup_game()
+
 
 # d = Deck(1)
 # d.shuffle_deck()

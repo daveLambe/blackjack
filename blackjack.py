@@ -217,22 +217,19 @@ class Game:
         self.num_active_players = 0
         self.buy_in = 5
 
-
-    def start_game(self):
-        self.d.shuffle_deck()
-        ask_complete = False
-        while not ask_complete:
-            ask_num_players = raw_input('\nWelcome to Blackjack! How many players? \nSelect 1, 2, 3 or 4\n')
-            if ask_num_players.isdigit():
-                if int(ask_num_players) > 0 and int(ask_num_players) <= 4:
-                    for p in range(int(ask_num_players)):
-                        self.players.append(Gambler(50, p + 1))
-                        ask_complete = True
-                else:
-                    print 'Choose number between 1 and 4'
+    def ask_number_of_players(self):
+            ask_how_many_players = raw_input('\nWelcome to Blackjack! How many players? \nSelect 1, 2, 3 or 4\n')
+            if ask_how_many_players in ['1', '2', '3', '4']:
+                return ask_how_many_players
             else:
-                print 'Invalid input. Please enter number between 1-4'
+                print 'Invalid answer. Choose between 1-4 Players'
+                return self.ask_number_of_players()
 
+    def setup_game(self):
+        self.d.shuffle_deck()
+        user_answer = self.ask_number_of_players()
+        for p in range(int(user_answer)):
+            self.players.append(Gambler(50, p + 1))
         self.play()
 
     def play(self):
@@ -275,18 +272,21 @@ class Game:
         print '<----------------->'
         print '<----------------->'
         self.deal.dealer_take_turn(self.d)
+
+
 """
 for p in player:
 
 """
-        for p in self.players:
-                # if p.choose_hard_or_soft_value > self.deal.choose_hard_or_soft_value():
-            print 'Player {} score: {} | Dealer score: {}'.format(p.player_number, p.choose_hard_or_soft_value(), self.deal.choose_hard_or_soft_value())
-            if p.choose_hard_or_soft_value() > self.deal.choose_hard_or_soft_value() and p.choose_hard_or_soft_value < 22:
-                p.win()
-                print 'Player {} wins {}!! Bank: {}'.format(p.current_bet, p.player_number, p.bank)
-            elif self.deal.choose_hard_or_soft_value() > p.choose_hard_or_soft_value() and self.deal.choose_hard_or_soft_value() < 22:
-                print 'Dealer wins! Player {} loses {}!'.format(p.player_number, p.current_bet)
+
+#         for p in self.players:
+#                 # if p.choose_hard_or_soft_value > self.deal.choose_hard_or_soft_value():
+#             print 'Player {} score: {} | Dealer score: {}'.format(p.player_number, p.choose_hard_or_soft_value(), self.deal.choose_hard_or_soft_value())
+#             if p.choose_hard_or_soft_value() > self.deal.choose_hard_or_soft_value() and p.choose_hard_or_soft_value < 22:
+#                 p.win()
+#                 print 'Player {} wins {}!! Bank: {}'.format(p.current_bet, p.player_number, p.bank)
+#             elif self.deal.choose_hard_or_soft_value() > p.choose_hard_or_soft_value() and self.deal.choose_hard_or_soft_value() < 22:
+#                 print 'Dealer wins! Player {} loses {}!'.format(p.player_number, p.current_bet)
 
 
 
@@ -312,7 +312,7 @@ for p in player:
 
 
 the_game = Game()
-the_game.start_game()
+the_game.setup_game()
 
 # d = Deck(1)
 # d.shuffle_deck()

@@ -23,14 +23,14 @@ class Deck:
         self.number_of_decks = number_of_decks
         values = range(2, 11) + 'Jack Queen King Ace'.split()
         suits = 'Hearts Diamonds Spades Clubs'.split()
-        full_deck = [Card(str(v), s) for v in values for s in suits]
+        full_deck = [Card(str(v), s) for v in values for s in suits]  # todo - Do we need to string this?
         for i in range(self.number_of_decks):
             self.all_decks += full_deck
 
     def deal_card_from_deck(self):
         return self.all_decks.pop()
 
-    def print_deck_and_length(self):
+    def print_deck_and_length(self):  # todo - remove debug code
         print self.all_decks
         print len(self.all_decks)
 
@@ -217,6 +217,7 @@ class Game:
         self.num_active_players = 0
         self.buy_in = 5
 
+
     def start_game(self):
         self.d.shuffle_deck()
         ask_complete = False
@@ -232,7 +233,7 @@ class Game:
             else:
                 print 'Invalid input. Please enter number between 1-4'
 
-        the_game.play()
+        self.play()
 
     def play(self):
         for p in self.players:
@@ -274,11 +275,18 @@ class Game:
         print '<----------------->'
         print '<----------------->'
         self.deal.dealer_take_turn(self.d)
+"""
+for p in player:
 
+"""
         for p in self.players:
-            if p.active_this_turn:
-                if p.choose_hard_or_soft_value > self.deal.choose_hard_or_soft_value():
-                    print 'Player {} score: Dealer score: {}'.format(p.choose_hard_or_soft_value, self.deal.choose_hard_or_soft_value())
+                # if p.choose_hard_or_soft_value > self.deal.choose_hard_or_soft_value():
+            print 'Player {} score: {} | Dealer score: {}'.format(p.player_number, p.choose_hard_or_soft_value(), self.deal.choose_hard_or_soft_value())
+            if p.choose_hard_or_soft_value() > self.deal.choose_hard_or_soft_value() and p.choose_hard_or_soft_value < 22:
+                p.win()
+                print 'Player {} wins {}!! Bank: {}'.format(p.current_bet, p.player_number, p.bank)
+            elif self.deal.choose_hard_or_soft_value() > p.choose_hard_or_soft_value() and self.deal.choose_hard_or_soft_value() < 22:
+                print 'Dealer wins! Player {} loses {}!'.format(p.player_number, p.current_bet)
 
 
 

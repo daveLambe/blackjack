@@ -6,7 +6,9 @@ Dealer hits on 17!
 
 Authors: DL, ML
 """
+
 # todo - Make Ace + facecard ONLY == 21.1. and lose is >= 22 (Ace and face card alone wins above all else)
+
 from random import shuffle
 
 
@@ -122,14 +124,14 @@ class Gambler(Player):
         self.current_bet = 0
 
     def win(self):
-        if self.choose_hard_or_soft_value() == 21:
-            self.active_this_hand = False
-            self.bank += (self.current_bet * 2)
+        # if self.choose_hard_or_soft_value() == 21:
+        #     self.active_this_hand = False
+        self.bank += (self.current_bet * 2)
 
     def lose(self):
-        if self.choose_hard_or_soft_value() > 21:
-            self.active_this_hand = False
-            self.bank -= self.current_bet
+        # if self.choose_hard_or_soft_value() > 21:
+        #     self.active_this_hand = False
+        self.bank -= self.current_bet
 
     def print_hand_and_value(self):
         print "\nPlayer {}'s full hand:".format(self.player_number)
@@ -242,6 +244,29 @@ class Game:
         self.num_active_players = 0
         self.buy_in = 5
 
+    # def dealer_or_player_score_win(self):
+    #     for p in self.players:
+    #         if self.deal.choose_hard_or_soft_value() < p.choose_hard_or_soft_value() < 22:
+    #                 p.win()
+    #                 print 'Player {} Wins!'.format(p.player_number)
+    #         elif p.choose_hard_or_soft_value() < self.deal.choose_hard_or_soft_value() < 22:
+    #             p.lose()
+    #             print 'Dealer wins'
+    #         elif p.choose_hard_or_soft_value() == self.deal.choose_hard_or_soft_value() and p.choose_hard_or_soft_value() < 22:
+    #             p.win()
+    #             print 'Player {} ties with dealer on: {}'.format(p.player_number, p.choose_hard_or_soft_value())
+
+    def dealer_or_player_score_win(self, player):
+            if self.deal.choose_hard_or_soft_value() < player.choose_hard_or_soft_value() and player.choose_hard_or_soft_value() < 22:
+                player.win()
+                print 'Player {} Wins! Bank now: {}'.format(player.player_number, player.bank)
+            elif player.choose_hard_or_soft_value() < self.deal.choose_hard_or_soft_value() and self.deal.choose_hard_or_soft_value() < 22:
+                player.lose()
+                print 'Player {} Loses! Bank now: {}'.format(player.player_number, player.bank)
+            elif player.choose_hard_or_soft_value() == self.deal.choose_hard_or_soft_value() and player.choose_hard_or_soft_value() < 22:
+                player.win()
+                print 'Player {} ties with dealer on: {} \n Bank now: {}'.format(player.player_number, player.choose_hard_or_soft_value(), player.bank)
+
     def ask_number_of_players(self):
             ask_how_many_players = raw_input('\nWelcome to Blackjack! How many players? \nSelect 1, 2, 3 or 4\n')
             if ask_how_many_players in ['1', '2', '3', '4']:
@@ -299,6 +324,16 @@ class Game:
         print '<----------------->'
         print '<----------------->'
         self.deal.dealer_take_turn(self.d)
+
+        print
+        print
+        print 'Final Hand Results: '
+        for p in self.players:
+            if p.active_this_game:
+                print 'Player Score: {} | Dealer Score: {}'.format(
+                    p.choose_hard_or_soft_value(), self.deal.choose_hard_or_soft_value())
+                self.dealer_or_player_score_win(p)
+
 
 the_game = Game()
 the_game.setup_game()

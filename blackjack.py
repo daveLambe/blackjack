@@ -202,11 +202,11 @@ class Dealer(Player):
         self.dealer_went_bust = False
         self.dealer_turn_over = False
 
-    def win(self):
+    def dealer_win(self):
         if self.choose_hard_or_soft_value() == 21:
             self.dealer_wins = True
 
-    def lose(self):
+    def dealer_lose(self):
         if self.choose_hard_or_soft_value() > 21:
             self.dealer_went_bust = True
 
@@ -244,28 +244,21 @@ class Game:
         self.num_active_players = 0
         self.buy_in = 5
 
-    # def dealer_or_player_score_win(self):
-    #     for p in self.players:
-    #         if self.deal.choose_hard_or_soft_value() < p.choose_hard_or_soft_value() < 22:
-    #                 p.win()
-    #                 print 'Player {} Wins!'.format(p.player_number)
-    #         elif p.choose_hard_or_soft_value() < self.deal.choose_hard_or_soft_value() < 22:
-    #             p.lose()
-    #             print 'Dealer wins'
-    #         elif p.choose_hard_or_soft_value() == self.deal.choose_hard_or_soft_value() and p.choose_hard_or_soft_value() < 22:
-    #             p.win()
-    #             print 'Player {} ties with dealer on: {}'.format(p.player_number, p.choose_hard_or_soft_value())
 
-    def dealer_or_player_score_win(self, player):
-            if self.deal.choose_hard_or_soft_value() < player.choose_hard_or_soft_value() and player.choose_hard_or_soft_value() < 22:
-                player.win()
-                print 'Player {} Wins! Bank now: {}'.format(player.player_number, player.bank)
-            elif player.choose_hard_or_soft_value() < self.deal.choose_hard_or_soft_value() and self.deal.choose_hard_or_soft_value() < 22:
-                player.lose()
-                print 'Player {} Loses! Bank now: {}'.format(player.player_number, player.bank)
-            elif player.choose_hard_or_soft_value() == self.deal.choose_hard_or_soft_value() and player.choose_hard_or_soft_value() < 22:
-                player.win()
-                print 'Player {} ties with dealer on: {} \n Bank now: {}'.format(player.player_number, player.choose_hard_or_soft_value(), player.bank)
+    def dealer_or_player_score_win(self, gambler):
+        dealer_score = self.deal.choose_hard_or_soft_value()
+        gambler_score = gambler.choose_hard_or_soft_value()
+        if gambler_score > dealer_score and gambler_score < 22:
+            gambler.win()
+            print 'Player {} Wins! Bank now: {}'.format(gambler.player_number, gambler.bank)
+        elif dealer_score > gambler_score and dealer_score < 22:
+            gambler.lose()
+            print 'Player {} Loses! Bank now: {}'.format(gambler.player_number, gambler.bank)
+        elif gambler_score == dealer_score and gambler_score < 22:
+            gambler.win()
+            print 'Player {} ties with dealer on: {} \n Bank now: {}'.format(gambler.player_number,
+                                                                             gambler.choose_hard_or_soft_value(),
+                                                                             gambler.bank)
 
     def ask_number_of_players(self):
             ask_how_many_players = raw_input('\nWelcome to Blackjack! How many players? \nSelect 1, 2, 3 or 4\n')
@@ -337,30 +330,6 @@ class Game:
 
 the_game = Game()
 the_game.setup_game()
-
-
-
-"""
-for p in player:
-
-"""
-
-#         for p in self.players:
-#                 # if p.choose_hard_or_soft_value > self.deal.choose_hard_or_soft_value():
-#             print 'Player {} score: {} | Dealer score: {}'.format(p.player_number, p.choose_hard_or_soft_value(), self.deal.choose_hard_or_soft_value())
-#             if p.choose_hard_or_soft_value() > self.deal.choose_hard_or_soft_value() and p.choose_hard_or_soft_value < 22:
-#                 p.win()
-#                 print 'Player {} wins {}!! Bank: {}'.format(p.current_bet, p.player_number, p.bank)
-#             elif self.deal.choose_hard_or_soft_value() > p.choose_hard_or_soft_value() and self.deal.choose_hard_or_soft_value() < 22:
-#                 print 'Dealer wins! Player {} loses {}!'.format(p.player_number, p.current_bet)
-
-
-
-
-
-
-
-
 
 
 

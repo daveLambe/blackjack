@@ -1,6 +1,7 @@
 """
 BlackJack Game!
 Has a number of Gamblers versus an automated dealer.
+Number of players in determined at beginning by user input.
 Dealer hits on 17!
 
 Authors: DL, ML
@@ -10,6 +11,9 @@ from random import shuffle
 
 
 class Card:
+    """
+    Card class. Makes Card object which has a suit and value.
+    """
     def __init__(self, value, suit):
         self.value = value
         self.suit = suit
@@ -19,6 +23,11 @@ class Card:
 
 
 class Deck:
+    """
+    Deck class
+    Makes entire deck using card class.
+    Makes number of decks input on instantiation.
+    """
     def __init__(self, number_of_decks):
         self.all_decks = []
         self.number_of_decks = number_of_decks
@@ -40,6 +49,10 @@ class Deck:
 
 
 class Player:
+    """
+    Player Class.
+    This is the Parent Class for both Gambler and Dealer.
+    """
     def __init__(self):
         self.hand = []
 
@@ -96,6 +109,9 @@ class Player:
 
 
 class Gambler(Player):
+    """
+    Gambler class. Number of Gamblers is determined by user input.
+    """
     def __init__(self, bank, player_number):
         Player.__init__(self)
         self.bank = bank
@@ -175,6 +191,9 @@ class Gambler(Player):
 
 
 class Dealer(Player):
+    """
+    Dealer Class for automated Dealer.
+    """
     def __init__(self):
         Player.__init__(self)
         self.dealer_wins = False
@@ -213,6 +232,9 @@ class Dealer(Player):
 
 
 class Game:
+    """
+    Game Class. Controls game Setup and Play
+    """
     def __init__(self):
         self.d = Deck(2)
         self.players = []

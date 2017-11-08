@@ -120,18 +120,17 @@ class Gambler(Player):
         self.player_number = player_number
         self.active_this_hand = True
         self.active_this_game = True
+        self.gambler_went_bust = False
+        self.gambler_got_blackjack = False
         self.bank = bank
         self.current_bet = 0
 
     def win(self):
-        # if self.choose_hard_or_soft_value() == 21:
-        #     self.active_this_hand = False
         self.bank += (self.current_bet * 2)
 
     def lose(self):
-        # if self.choose_hard_or_soft_value() > 21:
-        #     self.active_this_hand = False
-        self.bank -= self.current_bet
+        if self.current_bet > 5:
+            self.bank -= (self.current_bet - 5)
 
     def print_hand_and_value(self):
         print "\nPlayer {}'s full hand:".format(self.player_number)
@@ -151,6 +150,7 @@ class Gambler(Player):
                 elif ask_bet % 5 == 0 and ask_bet > 0:
                     print 'You added {} to your current bet'.format(ask_bet)
                     self.current_bet += ask_bet
+                    self.bank -= ask_bet
                     print 'Your current bet is now: {}'.format(self.current_bet)
                     answered = True
                 elif ask_bet == 0:
@@ -168,11 +168,13 @@ class Gambler(Player):
             if self.choose_hard_or_soft_value() > 21:
                 still_going = False
                 self.active_this_hand = False
+                self.gambler_went_bust = True
                 self.lose()
                 print 'Player {} loses by bust!'.format(self.player_number)
             elif self.choose_hard_or_soft_value() == 21:
                 still_going = False
                 self.active_this_hand = False
+                self.gambler_got_blackjack = True
                 self.win()
                 print 'Player {} wins at 21!'.format(self.player_number)
             else:
@@ -185,7 +187,7 @@ class Gambler(Player):
                     self.hand.append(card)
                 elif ask_player_turn == 'stay':
                     still_going = False
-                    self.active_this_hand = False
+                    # self.active_this_hand = False
                 elif ask_player_turn == 'bet':
                     self.add_to_bet()
                 else:
@@ -228,6 +230,7 @@ class Dealer(Player):
             if self.choose_hard_or_soft_value() > 21:
                 print 'Dealer busts!'
                 dealer_still_going = False
+                self.dealer_went_bust = True
             elif self.choose_hard_or_soft_value() == 21:
                 dealer_still_going = False
                 print 'Dealer hits 21!'
@@ -244,21 +247,45 @@ class Game:
         self.num_active_players = 0
         self.buy_in = 5
 
+    def get_num_active_hand(self):
+        count = 0
+        for p in self.players:
+            if p.active_this_hand:
+                count += 1
+        return count
+
+    def get_num_active_game(self):
+        count = 0
+        for p in self.players:
+            if p.active_this_game:
+                count += 1
+        return count
 
     def dealer_or_player_score_win(self, gambler):
         dealer_score = self.deal.choose_hard_or_soft_value()
+        dealer_bust = self.deal.dealer_went_bust
         gambler_score = gambler.choose_hard_or_soft_value()
-        if gambler_score > dealer_score and gambler_score < 22:
+        gambler_bust = gambler.gambler_went_bust
+
+        if dealer_bust and not gambler_bust:
             gambler.win()
             print 'Player {} Wins! Bank now: {}'.format(gambler.player_number, gambler.bank)
-        elif dealer_score > gambler_score and dealer_score < 22:
+        elif gambler_bust and not dealer_bust:
+            print 'Player {} Loses! Bank now: {}'.format(gambler.player_number, gambler.bank)
+        elif gambler_bust and dealer_bust:
+            print 'Player {} Loses! Bank now: {}'.format(gambler.player_number, gambler.bank)
+        elif dealer_score > gambler_score:
             gambler.lose()
             print 'Player {} Loses! Bank now: {}'.format(gambler.player_number, gambler.bank)
+        elif gambler_score > dealer_score:
+            gambler.win()
+            print 'Player {} Wins! Bank now: {}'.format(gambler.player_number, gambler.bank)
         elif gambler_score == dealer_score and gambler_score < 22:
             gambler.win()
-            print 'Player {} ties with dealer on: {} \n Bank now: {}'.format(gambler.player_number,
-                                                                             gambler.choose_hard_or_soft_value(),
-                                                                             gambler.bank)
+            print 'Player {} ties with dealer on: {} | Bank now: {}'.format(
+                gambler.player_number, gambler.choose_hard_or_soft_value(), gambler.bank)
+        else:
+            print 'You missed something'
 
     def ask_number_of_players(self):
             ask_how_many_players = raw_input('\nWelcome to Blackjack! How many players? \nSelect 1, 2, 3 or 4\n')
@@ -270,114 +297,74 @@ class Game:
 
     def setup_game(self):
         self.d.shuffle_deck()
-        user_answer = self.ask_number_of_players()
-        for p in range(int(user_answer)):
+        user_answer = int(self.ask_number_of_players())
+        for p in range(user_answer):
             self.players.append(Gambler(50, p + 1))
+            self.num_active_players += user_answer
         self.play()
 
     def play(self):
-        for p in self.players:
-            if p.bank < 5:
-                print 'Player {} does not have enough money to play!'.format(p.player_number)
-                p.active_this_game = False
-            else:
-                # self.num_active_players += 1
-                p.clear_hand()
-                p.bank -= self.buy_in
-                p.current_bet += self.buy_in
-                p.add_card_to_hand(self.d.deal_card_from_deck())
-                p.add_card_to_hand(self.d.deal_card_from_deck())
-                self.deal.clear_hand()
-                self.deal.add_card_to_hand(self.d.deal_card_from_deck())
+        while self.num_active_players > 0:
+            for p in self.players:
+                if p.bank < 5:
+                    print 'Player {} does not have enough money to play!'.format(p.player_number)
+                    p.active_this_game = False
+                    p.active_this_hand = False
+                    self.num_active_players -= 1
+                else:
+                    p.clear_hand()
+                    p.bank -= self.buy_in
+                    p.current_bet += self.buy_in
+                    p.add_card_to_hand(self.d.deal_card_from_deck())
+                    p.add_card_to_hand(self.d.deal_card_from_deck())
+                    self.deal.clear_hand()
+                    self.deal.add_card_to_hand(self.d.deal_card_from_deck())
 
-        for p in self.players:
-            if p.active_this_game:
-                print
-                print
-                print '<----------------->'
-                print '<----------------->'
-                print '<----------------->'
-                print '<----------------->'
-                print
-                print "Player {}'s turn! Bank: {}".format(p.player_number, p.bank)
-                print
-                print '<----------------->'
-                print '<----------------->'
-                print '<----------------->'
-                print '<----------------->'
-                p.take_turn(self.deal.get_faceup_card(), self.d)
+            for p in self.players:
+                if p.active_this_game:
+                    print_gambler_turn(p)
+                    p.take_turn(self.deal.get_faceup_card(), self.d)
 
-        print
-        print
-        print '<----------------->'
-        print '<----------------->'
-        print
-        print 'Dealers turn!'
-        print
-        print '<----------------->'
-        print '<----------------->'
-        self.deal.dealer_take_turn(self.d)
+            if self.get_num_active_hand() > 0:
+                print_dealer_turn()
+                self.deal.dealer_take_turn(self.d)
+                print
+                print '<----------------->'
+                print 'Final Hand Results: '
+                print '<----------------->'
+                print
 
-        print
-        print
-        print 'Final Hand Results: '
-        for p in self.players:
-            if p.active_this_game:
-                print 'Player Score: {} | Dealer Score: {}'.format(
-                    p.choose_hard_or_soft_value(), self.deal.choose_hard_or_soft_value())
-                self.dealer_or_player_score_win(p)
+            for p in self.players:
+                if not p.gambler_went_bust or not p.gambler_got_blackjack:
+                    print '<------------------------------------->'
+                    print 'Player {} Score: {} | Dealer Score: {}'.format(p.player_number,
+                        p.choose_hard_or_soft_value(), self.deal.choose_hard_or_soft_value())
+                    print '<------------------------------------->'
+                    print
+                    self.dealer_or_player_score_win(p)
+
+
+def print_gambler_turn(g):
+    print
+    print '<----------------->'
+    print '<----------------->'
+    print
+    print "Player {}'s turn! Bank: {}".format(g.player_number, g.bank)
+    print
+    print '<----------------->'
+    print '<----------------->'
+
+
+def print_dealer_turn():
+    print
+    print '<----------------->'
+    print '<----------------->'
+    print
+    print 'Dealers turn!'
+    print
+    print '<----------------->'
+    print '<----------------->'
 
 
 the_game = Game()
 the_game.setup_game()
-
-
-
-# This will run every time a hand is played
-# Check if players have enough money to play
-# If not, take them out of active players?
-# If so, reduce bank by buy in
-# deal 2 cards to each player
-# deal one faceup card to dealer
-# Ask each player to play
-# make dealer play
-# assess immediate wins/losses
-# assess win by higher number for all players & dealer
-# print out all winners
-
-
-
-
-# d = Deck(1)
-# d.shuffle_deck()
-#
-# gambler = Gambler(50, 1)
-# gambler.add_card_to_hand(d.deal_card_from_deck())
-# gambler.add_card_to_hand(d.deal_card_from_deck())
-#
-# dealer = Dealer()
-# dealer.add_card_to_hand(d.deal_card_from_deck())
-# dealer.add_card_to_hand(d.deal_card_from_deck())
-#
-# gambler.take_turn(dealer.get_faceup_card(), d)
-
-
-
-
-# print 'Gambler stuff'
-# g = Gambler(50, 1)
-# g.add_card_to_hand(d.deal_card_from_deck())
-# g.add_card_to_hand(d.deal_card_from_deck())
-# g.add_card_to_hand(d.deal_card_from_deck())
-#
-# g.print_entire_hand()
-# g.print_hand_value()
-#
-# print
-# print 'Dealer stuff'
-# deal = Dealer()
-# deal.add_card_to_hand(d.deal_card_from_deck())
-# deal.add_card_to_hand(d.deal_card_from_deck())
-# deal.add_card_to_hand(d.deal_card_from_deck())
-# deal.print_dealer_full_hand_and_value()
-# print deal.get_faceup_card()

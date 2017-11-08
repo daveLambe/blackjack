@@ -273,18 +273,15 @@ class Game:
         dealer_bust = self.deal.dealer_went_bust
         gambler_score = gambler.choose_hard_or_soft_value()
 
-        # if dealer_bust:
-        #     gambler.win()
-        #     print 'Player {} Wins! Bank now: {}'.format(gambler.player_number, gambler.bank)
-        #     print '1'
-        if gambler_score > dealer_score:
+        if dealer_bust:
             gambler.win()
             print 'Player {} Wins! Bank now: {}'.format(gambler.player_number, gambler.bank)
-            print '2'
+        elif gambler_score > dealer_score:
+            gambler.win()
+            print 'Player {} Wins! Bank now: {}'.format(gambler.player_number, gambler.bank)
         elif dealer_score > gambler_score:
             gambler.lose()
             print 'Player {} Loses! Bank now: {}'.format(gambler.player_number, gambler.bank)
-            print '3'
         elif gambler_score == dealer_score:
             gambler.bank += gambler.current_bet
             print 'Player {} ties with Dealer! Bet Returned. Bank now: {}'.format(gambler.player_number, gambler.bank)
@@ -306,6 +303,7 @@ class Game:
         p.add_card_to_hand(self.d.deal_card_from_deck())
         self.deal.clear_hand()
         self.deal.add_card_to_hand(self.d.deal_card_from_deck())
+        self.deal.dealer_went_bust = False
 
     def setup_game(self):
         self.d.shuffle_deck()

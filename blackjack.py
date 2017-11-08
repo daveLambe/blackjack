@@ -273,15 +273,18 @@ class Game:
         dealer_bust = self.deal.dealer_went_bust
         gambler_score = gambler.choose_hard_or_soft_value()
 
-        if dealer_bust:
+        # if dealer_bust:
+        #     gambler.win()
+        #     print 'Player {} Wins! Bank now: {}'.format(gambler.player_number, gambler.bank)
+        #     print '1'
+        if gambler_score > dealer_score:
             gambler.win()
             print 'Player {} Wins! Bank now: {}'.format(gambler.player_number, gambler.bank)
-        elif gambler_score > dealer_score:
-            gambler.win()
-            print 'Player {} Wins! Bank now: {}'.format(gambler.player_number, gambler.bank)
+            print '2'
         elif dealer_score > gambler_score:
             gambler.lose()
             print 'Player {} Loses! Bank now: {}'.format(gambler.player_number, gambler.bank)
+            print '3'
         elif gambler_score == dealer_score:
             gambler.bank += gambler.current_bet
             print 'Player {} ties with Dealer! Bet Returned. Bank now: {}'.format(gambler.player_number, gambler.bank)
@@ -293,6 +296,16 @@ class Game:
             else:
                 print 'Invalid answer. Choose between 1-4 Players'
                 return self.ask_number_of_players()
+
+    def fresh_hand_setup(self, p):
+        p.clear_hand()
+        p.active_this_hand = True
+        p.bank -= self.buy_in
+        p.current_bet += self.buy_in
+        p.add_card_to_hand(self.d.deal_card_from_deck())
+        p.add_card_to_hand(self.d.deal_card_from_deck())
+        self.deal.clear_hand()
+        self.deal.add_card_to_hand(self.d.deal_card_from_deck())
 
     def setup_game(self):
         self.d.shuffle_deck()
@@ -311,13 +324,7 @@ class Game:
                     p.active_this_hand = False
                     self.num_active_players -= 1
                 else:
-                    p.clear_hand()
-                    p.bank -= self.buy_in
-                    p.current_bet += self.buy_in
-                    p.add_card_to_hand(self.d.deal_card_from_deck())
-                    p.add_card_to_hand(self.d.deal_card_from_deck())
-                    self.deal.clear_hand()
-                    self.deal.add_card_to_hand(self.d.deal_card_from_deck())
+                    self.fresh_hand_setup(p)
 
             for p in self.players:
                 if p.active_this_game:

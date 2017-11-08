@@ -7,12 +7,13 @@ Dealer hits on 17!
 Authors: DL, ML
 """
 
-# todo - Make Ace + facecard ONLY == 21.1. and lose is >= 22 (Ace and face card alone wins above all else)
+# todo - Make Ace + facecard ONLY == 21.1.
+# and lose is >= 22 (Ace and face card alone wins above all else)
 
 from random import shuffle
 
 
-class Card:
+class Card(object):
     """
     Card class. Makes Card object which has a suit and value.
     """
@@ -24,7 +25,7 @@ class Card:
         return '{} of {}'.format(self.value, self.suit)
 
 
-class Deck:
+class Deck(object):
     """
     Deck class
     Makes entire deck using card class.
@@ -35,7 +36,7 @@ class Deck:
         self.number_of_decks = number_of_decks
         values = range(2, 11) + 'Jack Queen King Ace'.split()
         suits = 'Hearts Diamonds Spades Clubs'.split()
-        full_deck = [Card(str(v), s) for v in values for s in suits]  # todo - Do we need to string this?
+        full_deck = [Card(str(v), s) for v in values for s in suits]
         for i in range(self.number_of_decks):
             self.all_decks += full_deck
 
@@ -54,7 +55,7 @@ class Deck:
         shuffle(self.all_decks)
 
 
-class Player:
+class Player(object):
     """
     Player Class.
     This is the Parent Class for both Gambler and Dealer.
@@ -78,8 +79,8 @@ class Player:
         """
         Prints entire Player hand (list)
         """
-        for c in self.hand:
-            print c
+        for card in self.hand:
+            print card
 
     def get_soft_hand_value(self):
         """
@@ -87,10 +88,10 @@ class Player:
         :return: int
         """
         soft_hand_value = 0
-        for c in self.hand:
-            if c.value.isdigit():
-                soft_hand_value += int(c.value)
-            elif c.value == 'Ace':
+        for card in self.hand:
+            if card.value.isdigit():
+                soft_hand_value += int(card.value)
+            elif card.value == 'Ace':
                 soft_hand_value += 1
             else:
                 soft_hand_value += 10
@@ -102,10 +103,10 @@ class Player:
         :return: int
         """
         hard_hand_value = 0
-        for c in self.hand:
-            if c.value.isdigit():
-                hard_hand_value += int(c.value)
-            elif c.value == 'Ace':
+        for card in self.hand:
+            if card.value.isdigit():
+                hard_hand_value += int(card.value)
+            elif card.value == 'Ace':
                 hard_hand_value += 11
             else:
                 hard_hand_value += 10
@@ -131,15 +132,16 @@ class Player:
         Returns both hard and soft value if Player has Ace and hard value won't go bust
         :return: Entire hand(list) and string showing value of hand
         """
-        for c in self.hand:
-            print c
+        for card in self.hand:
+            print card
         soft_value = self.get_soft_hand_value()
         hard_value = self.get_hard_hand_value()
         if hard_value == soft_value or hard_value > 21:
             print '\nHand value is {}'.format(self.get_soft_hand_value())
         else:
             print '\nSoft hand value is {} ' \
-                  '\nHard hand value is: {}'.format(self.get_soft_hand_value(), self.get_hard_hand_value())
+                  '\nHard hand value is: {}'.format(self.get_soft_hand_value(),
+                                                    self.get_hard_hand_value())
 
 
 class Gambler(Player):
@@ -171,8 +173,6 @@ class Gambler(Player):
         """
         if self.current_bet > 5:
             self.bank -= (self.current_bet - 5)
-        # else:
-        #     self.bank -= self.current_bet - todo maybe not necessary as buy in is subtracted at start of hand
 
     def print_hand_and_value(self):
         """
@@ -187,7 +187,6 @@ class Gambler(Player):
         Takes user input to add to Gambler current_bet
         Only allows multiple of fives
         Will only allow if Gambler has enough money in bank
-        :return:
         """
         if self.bank < 5:
             print "You don't have any more money to bet!"
@@ -242,7 +241,8 @@ class Gambler(Player):
                 print '<----------------->'
             else:
                 print '\nDealers face up card: {}'.format(dealer_faceup_card)
-                ask_player_turn = raw_input("\nEnter your next move!\nOptions:\n\t'Hit'\n\t'Stay'\n\t'Bet' \n").lower()
+                ask_player_turn = raw_input("\nEnter your next move!"
+                                            "\nOptions:\n\t'Hit'\n\t'Stay'\n\t'Bet' \n").lower()
                 if ask_player_turn == 'hit':
                     card = deck.deal_card_from_deck()
                     print
@@ -290,7 +290,7 @@ class Dealer(Player):
         """
         return self.hand[0]
 
-    def print_dealer_full_hand_and_value(self):
+    def print_dealer_hand_and_value(self):
         """
         Prints Dealer hand and value, extends print_hand_and_value method in Player to add string.
         :return:
@@ -312,7 +312,7 @@ class Dealer(Player):
             dealer_new_card = deck.deal_card_from_deck()
             print 'Dealer drew: {}'.format(str(dealer_new_card))
             self.add_card_to_hand(dealer_new_card)
-            self.print_dealer_full_hand_and_value()
+            self.print_dealer_hand_and_value()
             if self.choose_hard_or_soft_value() > 21:
                 print 'Dealer busts!'
                 dealer_still_going = False
@@ -322,12 +322,12 @@ class Dealer(Player):
                 print 'Dealer hits 21!'
 
 
-class Game:
+class Game(object):
     """
     Game Class. Controls game Setup and Play
     """
     def __init__(self):
-        self.d = Deck(2)
+        self.deck = Deck(2)
         self.players = []
         self.deal = Dealer()
         self.num_active_players = 0
@@ -339,8 +339,8 @@ class Game:
         :return: int
         """
         count = 0
-        for p in self.players:
-            if p.active_this_hand:
+        for player in self.players:
+            if player.active_this_hand:
                 count += 1
         return count
 
@@ -350,8 +350,8 @@ class Game:
         :return: int
         """
         count = 0
-        for p in self.players:
-            if p.active_this_game:
+        for player in self.players:
+            if player.active_this_game:
                 count += 1
         return count
 
@@ -376,15 +376,18 @@ class Game:
             print 'Player {} Loses! Bank now: {}'.format(gambler.player_number, gambler.bank)
         elif gambler_score == dealer_score:
             gambler.bank += gambler.current_bet
-            print 'Player {} ties with Dealer! Bet Returned. Bank now: {}'.format(gambler.player_number, gambler.bank)
+            print 'Player {} ties with Dealer! Bet Returned. ' \
+                  'Bank now: {}'.format(gambler.player_number, gambler.bank)
 
     def ask_number_of_players(self):
         """
-        Runs at start of game. Takes user input to determine how many Gamblers in game
+        Runs at start of game.
+        Takes user input to determine how many Gamblers in game
         Uses recursion to run until valid answer given
         :return:
         """
-        ask_how_many_players = raw_input('\nWelcome to Blackjack! How many players? \nSelect 1, 2, 3 or 4\n')
+        ask_how_many_players = raw_input('\nWelcome to Blackjack! '
+                                         'How many players? \nSelect 1, 2, 3 or 4\n')
         if ask_how_many_players in ['1', '2', '3', '4']:
             return int(ask_how_many_players)
         else:
@@ -399,30 +402,30 @@ class Game:
         Calls play() method to start game once Gmablers created
         :return:
         """
-        self.d.shuffle_deck()
+        self.deck.shuffle_deck()
         user_answer = self.ask_number_of_players()
-        for p in range(user_answer):
-            self.players.append(Gambler(50, p + 1))
+        for player in range(user_answer):
+            self.players.append(Gambler(50, player + 1))
             self.num_active_players += user_answer
         self.play()
 
-    def fresh_hand_setup(self, p):
+    def fresh_hand_setup(self, gambler):
         """
         Runs at beginning of each hand.
         Resets values that should be cleared upon new hand
         Clears Hand of Dealer & Gambler, current_bet.
         Also resets boolean win/lose values
-        :param p: p is iterating through self.players list
+        :param gambler: gambler is iterating through self.players list
         :return:
         """
-        p.clear_hand()
-        p.active_this_hand = True
-        p.bank -= self.buy_in
-        p.current_bet += self.buy_in
-        p.add_card_to_hand(self.d.deal_card_from_deck())
-        p.add_card_to_hand(self.d.deal_card_from_deck())
+        gambler.clear_hand()
+        gambler.active_this_hand = True
+        gambler.bank -= self.buy_in
+        gambler.current_bet = self.buy_in
+        gambler.add_card_to_hand(self.deck.deal_card_from_deck())
+        gambler.add_card_to_hand(self.deck.deal_card_from_deck())
         self.deal.clear_hand()
-        self.deal.add_card_to_hand(self.d.deal_card_from_deck())
+        self.deal.add_card_to_hand(self.deck.deal_card_from_deck())
         self.deal.dealer_went_bust = False
 
     def play(self):
@@ -433,52 +436,54 @@ class Game:
         For all Gamblers not win/bust, prints out their score Vs Dealer score and determines winner.
         """
         while self.num_active_players > 0:
-            for p in self.players:
-                if p.bank < 5:
-                    print 'Player {} does not have enough money to play!'.format(p.player_number)
-                    p.active_this_game = False
-                    p.active_this_hand = False
+            for gambler in self.players:
+                if gambler.bank < 5:
+                    print 'Player {} does not have enough money to play!' \
+                          ''.format(gambler.player_number)
+                    gambler.active_this_game = False
+                    gambler.active_this_hand = False
                     self.num_active_players -= 1
                 else:
-                    self.fresh_hand_setup(p)
+                    self.fresh_hand_setup(gambler)
 
-            for p in self.players:
-                if p.active_this_game:
-                    print_gambler_turn(p)
-                    p.take_turn(self.deal.get_faceup_card(), self.d)
+            for gambler in self.players:
+                if gambler.active_this_game:
+                    print_gambler_turn(gambler)
+                    gambler.take_turn(self.deal.get_faceup_card(), self.deck)
 
             if self.get_num_active_hand() > 0:
                 print_dealer_turn()
-                self.deal.dealer_take_turn(self.d)
+                self.deal.dealer_take_turn(self.deck)
                 print
                 print '<----------------->'
                 print 'Final Hand Results: '
                 print '<----------------->'
                 print
 
-            for p in self.players:
-                if p.active_this_hand:
+            for gambler in self.players:
+                if gambler.active_this_hand:
                     print '<------------------------------------->'
-                    print 'Player {} Score: {} | Dealer Score: {}'.format(p.player_number,
-                        p.choose_hard_or_soft_value(), self.deal.choose_hard_or_soft_value())
+                    print 'Player {} Score: {} | Dealer Score: {}' \
+                          ''.format(gambler.player_number, gambler.choose_hard_or_soft_value(),
+                                    self.deal.choose_hard_or_soft_value())
                     print '<------------------------------------->'
                     print
-                    self.dealer_or_player_score_win(p)
+                    self.dealer_or_player_score_win(gambler)
 
         print 'Thanks for playing!'
 
 
-def print_gambler_turn(g):
+def print_gambler_turn(gambler):
     """
     Pretty lines to print Players turn and details
-    :param g: g is list of Gamblers
+    :param gambler: g is list of Gamblers
     :return: Returns string with Player num & bank
     """
     print
     print '<----------------->'
     print '<----------------->'
     print
-    print "Player {}'s turn! Bank: {}".format(g.player_number, g.bank)
+    print "Player {}'s turn! Bank: {}".format(gambler.player_number, gambler.bank)
     print
     print '<----------------->'
     print '<----------------->'
@@ -487,7 +492,7 @@ def print_gambler_turn(g):
 def print_dealer_turn():
     """
     Pretty lines to print before Dealers turn
-    :return:
+    :return: Some pretty Strings
     """
     print
     print '<----------------->'
@@ -499,5 +504,5 @@ def print_dealer_turn():
     print '<----------------->'
 
 
-the_game = Game()
-the_game.setup_game()
+THE_GAME = Game()
+THE_GAME.setup_game()

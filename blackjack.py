@@ -506,6 +506,10 @@ def print_dealer_turn():
 
 
 def print_final_results_lines():
+    """
+    Prints pretty lines/header for final results
+    :return: Pretty lines
+    """
     print
     print '<----------------->'
     print 'Final Hand Results: '

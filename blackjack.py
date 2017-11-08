@@ -365,19 +365,30 @@ class Game(object):
         dealer_bust = self.deal.dealer_went_bust
         gambler_score = gambler.choose_hard_or_soft_value()
 
+        print '<------------------------------------->'
+        print 'Player {} Score: {} | Dealer Score: {}' \
+              ''.format(gambler.player_number, gambler.choose_hard_or_soft_value(),
+                        self.deal.choose_hard_or_soft_value())
+        print '<------------------------------------->'
+        print
+
         if dealer_bust:
             gambler.win()
             print 'Player {} Wins! Bank now: {}'.format(gambler.player_number, gambler.bank)
+            print
         elif gambler_score > dealer_score:
             gambler.win()
             print 'Player {} Wins! Bank now: {}'.format(gambler.player_number, gambler.bank)
+            print
         elif dealer_score > gambler_score:
             gambler.lose()
             print 'Player {} Loses! Bank now: {}'.format(gambler.player_number, gambler.bank)
+            print
         elif gambler_score == dealer_score:
             gambler.bank += gambler.current_bet
             print 'Player {} ties with Dealer! Bet Returned. ' \
                   'Bank now: {}'.format(gambler.player_number, gambler.bank)
+            print
 
     def ask_number_of_players(self):
         """
@@ -462,12 +473,6 @@ class Game(object):
 
             for gambler in self.players:
                 if gambler.active_this_hand:
-                    print '<------------------------------------->'
-                    print 'Player {} Score: {} | Dealer Score: {}' \
-                          ''.format(gambler.player_number, gambler.choose_hard_or_soft_value(),
-                                    self.deal.choose_hard_or_soft_value())
-                    print '<------------------------------------->'
-                    print
                     self.dealer_or_player_score_win(gambler)
 
         print 'Thanks for playing!'

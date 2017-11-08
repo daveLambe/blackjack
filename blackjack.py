@@ -465,11 +465,7 @@ class Game(object):
             if self.get_num_active_hand() > 0:
                 print_dealer_turn()
                 self.deal.dealer_take_turn(self.deck)
-                print
-                print '<----------------->'
-                print 'Final Hand Results: '
-                print '<----------------->'
-                print
+                print_final_results_lines()
 
             for gambler in self.players:
                 if gambler.active_this_hand:
@@ -507,6 +503,14 @@ def print_dealer_turn():
     print
     print '<----------------->'
     print '<----------------->'
+
+
+def print_final_results_lines():
+    print
+    print '<----------------->'
+    print 'Final Hand Results: '
+    print '<----------------->'
+    print
 
 
 THE_GAME = Game()

@@ -441,7 +441,6 @@ class Game(object):
         for player in range(user_answer):
             self.players.append(Gambler(50, player + 1))
             self.num_active_players += user_answer
-        self.play()
 
     def fresh_hand_setup(self, gambler):
         """
@@ -542,3 +541,4 @@ def print_final_results_lines():
 
 THE_GAME = Game()
 THE_GAME.setup_game()
+THE_GAME.play()

@@ -7,9 +7,6 @@ Dealer hits on 17!
 Authors: DL, ML
 """
 
-# todo - Make Ace + facecard ONLY == 21.1.
-# and lose is >= 22 (Ace and face card alone wins above all else)
-
 from random import shuffle
 
 
@@ -89,7 +86,11 @@ class Player(object):
         """
         soft_hand_value = 0
         for card in self.hand:
-            if card.value.isdigit():
+            if self.hand[0].value == 'Ace' and self.hand[1].value in ['Jack', 'Queen', 'King']:
+                soft_hand_value = 21.1
+            elif self.hand[0].value in ['Jack', 'Queen', 'King'] and self.hand[1].value == 'Ace':
+                soft_hand_value = 21.1
+            elif card.value.isdigit():
                 soft_hand_value += int(card.value)
             elif card.value == 'Ace':
                 soft_hand_value += 1
@@ -104,7 +105,11 @@ class Player(object):
         """
         hard_hand_value = 0
         for card in self.hand:
-            if card.value.isdigit():
+            if self.hand[0].value == 'Ace' and self.hand[1].value in ['Jack', 'Queen', 'King']:
+                hard_hand_value = 21.1
+            elif self.hand[0].value in ['Jack', 'Queen', 'King'] and self.hand[1].value == 'Ace':
+                hard_hand_value = 21.1
+            elif card.value.isdigit():
                 hard_hand_value += int(card.value)
             elif card.value == 'Ace':
                 hard_hand_value += 11
@@ -121,7 +126,7 @@ class Player(object):
         """
         soft_value = self.get_soft_hand_value()
         hard_value = self.get_hard_hand_value()
-        if hard_value > 21:
+        if hard_value >= 22:
             return soft_value
         else:
             return hard_value
@@ -136,7 +141,9 @@ class Player(object):
             print card
         soft_value = self.get_soft_hand_value()
         hard_value = self.get_hard_hand_value()
-        if hard_value == soft_value or hard_value > 21:
+        if hard_value == 21.1 or soft_value == 21.1:
+            print '\nHand value is Natural 21!'
+        elif hard_value == soft_value or hard_value >= 22:
             print '\nHand value is {}'.format(self.get_soft_hand_value())
         else:
             print '\nSoft hand value is {} ' \
@@ -154,8 +161,6 @@ class Gambler(Player):
         self.player_number = player_number
         self.active_this_hand = True
         self.active_this_game = True
-        # self.gambler_went_bust = False
-        # self.gambler_got_blackjack = False
         self.bank = bank
         self.current_bet = 0
 
@@ -163,7 +168,10 @@ class Gambler(Player):
         """
         Adds current bet multiplied by 2 to Gamblers Bank
         """
-        self.bank += (self.current_bet * 2)
+        if self.choose_hard_or_soft_value() == 21.1:
+            self.bank += (self.current_bet * 2.5)
+        else:
+            self.bank += (self.current_bet * 2)
 
     def lose(self):
         """
@@ -221,13 +229,23 @@ class Gambler(Player):
         still_going = True
         while still_going:
             self.print_hand_and_value()
-            if self.choose_hard_or_soft_value() > 21:
+            if self.choose_hard_or_soft_value() >= 22:
                 still_going = False
                 self.active_this_hand = False
                 self.lose()
                 print '<----------------->'
                 print
                 print 'Player {} loses by bust! Bank now: {}'.format(self.player_number, self.bank)
+                print
+                print '<----------------->'
+            elif self.choose_hard_or_soft_value() == 21.1:
+                still_going = False
+                self.active_this_hand = False
+                self.win()
+                print '<----------------->'
+                print
+                print 'Player {} wins with a natural!!! ' \
+                      'Bank now: {}'.format(self.player_number, self.bank)
                 print
                 print '<----------------->'
             elif self.choose_hard_or_soft_value() == 21:
@@ -297,8 +315,6 @@ class Dealer(Player):
         """
         print '\nDealers entire hand:'
         Player.print_hand_and_value(self)
-        # self.print_entire_hand()
-        # print '\nDealers hand value: {}'.format(self.choose_hard_or_soft_value())
 
     def dealer_take_turn(self, deck):
         """
@@ -308,15 +324,22 @@ class Dealer(Player):
         :return:
         """
         dealer_still_going = True
-        while dealer_still_going and self.choose_hard_or_soft_value() <= 16:
+        dealer_new_card = deck.deal_card_from_deck()
+        print 'Dealer drew: {}'.format(str(dealer_new_card))
+        self.add_card_to_hand(dealer_new_card)
+        self.print_dealer_hand_and_value()
+        while dealer_still_going and self.choose_hard_or_soft_value() < 17:
             dealer_new_card = deck.deal_card_from_deck()
             print 'Dealer drew: {}'.format(str(dealer_new_card))
             self.add_card_to_hand(dealer_new_card)
             self.print_dealer_hand_and_value()
-            if self.choose_hard_or_soft_value() > 21:
+            if self.choose_hard_or_soft_value() >= 22:
                 print 'Dealer busts!'
                 dealer_still_going = False
                 self.dealer_went_bust = True
+            elif self.choose_hard_or_soft_value() == 21.1:
+                dealer_still_going = False
+                print 'Dealer gets a natural!'
             elif self.choose_hard_or_soft_value() == 21:
                 dealer_still_going = False
                 print 'Dealer hits 21!'
@@ -327,7 +350,7 @@ class Game(object):
     Game Class. Controls game Setup and Play
     """
     def __init__(self):
-        self.deck = Deck(2)
+        self.deck = Deck(10)
         self.players = []
         self.deal = Dealer()
         self.num_active_players = 0

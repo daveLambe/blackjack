@@ -79,23 +79,32 @@ class Player(object):
         for card in self.hand:
             print card
 
+    def check_natural_win(self):
+        if len(self.hand) == 2:
+            if self.hand[0].value == 'Ace' and self.hand[1].value in ['Jack', 'Queen', 'King']:
+                return True
+            elif self.hand[0].value in ['Jack', 'Queen', 'King'] and self.hand[1].value == 'Ace':
+                return True
+            else:
+                return False
+        return False
+
     def get_soft_hand_value(self):
         """
         Calculates hand value with Ace as 1 (Soft hand value)
         :return: int
         """
         soft_hand_value = 0
-        for card in self.hand:
-            if self.hand[0].value == 'Ace' and self.hand[1].value in ['Jack', 'Queen', 'King']:
-                soft_hand_value = 21.1
-            elif self.hand[0].value in ['Jack', 'Queen', 'King'] and self.hand[1].value == 'Ace':
-                soft_hand_value = 21.1
-            elif card.value.isdigit():
-                soft_hand_value += int(card.value)
-            elif card.value == 'Ace':
-                soft_hand_value += 1
-            else:
-                soft_hand_value += 10
+        if self.check_natural_win():
+            soft_hand_value = 21.1
+        else:
+            for card in self.hand:
+                if card.value.isdigit():
+                    soft_hand_value += int(card.value)
+                elif card.value == 'Ace':
+                    soft_hand_value += 1
+                else:
+                    soft_hand_value += 10
         return soft_hand_value
 
     def get_hard_hand_value(self):
@@ -104,17 +113,16 @@ class Player(object):
         :return: int
         """
         hard_hand_value = 0
-        for card in self.hand:
-            if self.hand[0].value == 'Ace' and self.hand[1].value in ['Jack', 'Queen', 'King']:
-                hard_hand_value = 21.1
-            elif self.hand[0].value in ['Jack', 'Queen', 'King'] and self.hand[1].value == 'Ace':
-                hard_hand_value = 21.1
-            elif card.value.isdigit():
-                hard_hand_value += int(card.value)
-            elif card.value == 'Ace':
-                hard_hand_value += 11
-            else:
-                hard_hand_value += 10
+        if self.check_natural_win():
+            hard_hand_value = 21.1
+        else:
+            for card in self.hand:
+                if card.value.isdigit():
+                    hard_hand_value += int(card.value)
+                elif card.value == 'Ace':
+                    hard_hand_value += 11
+                else:
+                    hard_hand_value += 10
         return hard_hand_value
 
     def choose_hard_or_soft_value(self):

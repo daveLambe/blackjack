@@ -23,6 +23,11 @@ class Card(object):
         return '{} of {}'.format(self.value, self.suit)
 
     def get_card_points(self):
+        """
+        Runs when a Card is instantiated
+        Assigns each card a points value
+        :return: int to be used for self.points attribute
+        """
         return (10 if self.value in ('Jack', 'King', 'Queen')
                 else 1 if self.value == 'Ace'
                 else int(self.value))
@@ -46,14 +51,12 @@ class Deck(object):
     def deal_card_from_deck(self):
         """
         Pops card from Deck and returns it
-        :return:
         """
         return self.all_decks.pop()
 
     def shuffle_deck(self):
         """
         Uses import shuffle to shuffle Deck
-        :return:
         """
         shuffle(self.all_decks)
 
@@ -86,15 +89,28 @@ class Player(object):
             print card
 
     def check_natural_win(self):
+        """
+        Checks if a hand has two cards
+        First checks if hand has two cards
+        :return: True if Ace & face card, False otherwise
+        """
         if len(self.hand) == 2:
             return ((self.hand[0].value == 'Ace' and self.hand[1].value in ('Jack', 'King', 'Queen')) or
-                (self.hand[1].value == 'Ace' and self.hand[0].value in ('Jack', 'King', 'Queen')))
+                    (self.hand[1].value == 'Ace' and self.hand[0].value in ('Jack', 'King', 'Queen')))
 
     def get_soft_hand_value(self):
+        """
+        Calculates hand value with Ace as 1
+        :return: int
+        """
         return (21.1 if self.check_natural_win()
                 else sum(card.points for card in self.hand))
 
     def get_hard_hand_value(self):
+        """
+        Calculates hand value with Ace as 11
+        :return: int
+        """
         return (21.1 if self.check_natural_win()
                 else self.get_soft_hand_value() +
                 10 * sum(card.value == 'Ace' for card in self.hand))

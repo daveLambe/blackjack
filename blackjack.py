@@ -17,9 +17,15 @@ class Card(object):
     def __init__(self, value, suit):
         self.value = value
         self.suit = suit
+        self.points = self.get_card_points()
 
     def __repr__(self):
         return '{} of {}'.format(self.value, self.suit)
+
+    def get_card_points(self):
+        return (10 if self.value in ('Jack', 'King', 'Queen')
+                else 1 if self.value == 'Ace'
+                else int(self.value))
 
 
 class Deck(object):
@@ -79,11 +85,13 @@ class Player(object):
         for card in self.hand:
             print card
 
+# todo: find a better way to do check_natural_win. Too many True/False statements
+
     def check_natural_win(self):
         if len(self.hand) == 2:
-            if self.hand[0].value == 'Ace' and self.hand[1].value in ['Jack', 'Queen', 'King']:
+            if self.hand[0].value == 'Ace' and self.hand[1].value in ('Jack', 'Queen', 'King'):
                 return True
-            elif self.hand[0].value in ['Jack', 'Queen', 'King'] and self.hand[1].value == 'Ace':
+            elif self.hand[0].value in ('Jack', 'Queen', 'King') and self.hand[1].value == 'Ace':
                 return True
             else:
                 return False

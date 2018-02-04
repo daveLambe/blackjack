@@ -94,9 +94,11 @@ class Player(object):
         Checks length of set is 2, Ace is in hand and set is subset of facecards
         :return: True if set has length of two & another face card else False
         """
-        hand_set = set(card.value for card in self.hand)
-        return len(hand_set) == 2 and 'Ace' in hand_set \
-            and hand_set < {'Ace', 'Jack', 'King', 'Queen'}
+        if len(self.hand) == 2:
+            hand_set = set(card.value for card in self.hand)
+            return len(hand_set) == 2 and 'Ace' in hand_set \
+                and hand_set < {'Ace', 'Jack', 'King', 'Queen'}
+        return False
 
     def get_soft_hand_value(self):
         """
@@ -146,11 +148,11 @@ class Player(object):
         if hard_value == 21.1 or soft_value == 21.1:
             print '\nHand value is Natural 21!'
         elif hard_value == soft_value or hard_value >= 22:
-            print '\nHand value is {}'.format(self.get_soft_hand_value())
+            print '\nHand value is {}'.format(soft_value)
         else:
             print '\nSoft hand value is {} ' \
-                  '\nHard hand value is: {}'.format(self.get_soft_hand_value(),
-                                                    self.get_hand_value())
+                  '\nHard hand value is: {}'.format(soft_value,
+                                                    hard_value)
 
 
 class Gambler(Player):

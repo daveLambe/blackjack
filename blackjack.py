@@ -90,14 +90,13 @@ class Player(object):
 
     def check_natural_win(self):
         """
-        Checks if a hand has two cards
-        First checks if hand has two cards
-        :return: True if Ace & face card, False otherwise
+        Makes a set of all values of cards in hand
+        Checks length of set is 2, Ace is in hand and set is subset of facecards
+        :return: True if set has length of two & another face card else False
         """
-        if len(self.hand) == 2:
-            return ((self.hand[0].value == 'Ace' and self.hand[1].value in ('Jack', 'King', 'Queen')) or
-                    (self.hand[1].value == 'Ace' and self.hand[0].value in ('Jack', 'King', 'Queen')))
-        return False
+        hand_set = set(card.value for card in self.hand)
+        return len(hand_set) == 2 and 'Ace' in hand_set \
+            and hand_set < {'Ace', 'Jack', 'King', 'Queen'}
 
     def get_soft_hand_value(self):
         """

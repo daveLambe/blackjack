@@ -95,8 +95,8 @@ class Player(object):
         :return: True if set has length of two & another face card else False
         """
         if len(self.hand) == 2:
-            hand_set = set(card.value for card in self.hand)
-            return len(hand_set) == 2 and 'Ace' in hand_set and hand_set < {'Ace', 'Jack', 'King', 'Queen'}
+            vals = set(card.value for card in self.hand)
+            return len(vals) == 2 and 'Ace' in vals and vals < {'Ace', 'Jack', 'King', 'Queen'}
         return False
 
     def get_soft_hand_value(self):

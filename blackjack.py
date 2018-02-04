@@ -96,8 +96,7 @@ class Player(object):
         """
         if len(self.hand) == 2:
             hand_set = set(card.value for card in self.hand)
-            return len(hand_set) == 2 and 'Ace' in hand_set \
-                and hand_set < {'Ace', 'Jack', 'King', 'Queen'}
+            return len(hand_set) == 2 and 'Ace' in hand_set and hand_set < {'Ace', 'Jack', 'King', 'Queen'}
         return False
 
     def get_soft_hand_value(self):

@@ -108,6 +108,10 @@ class Player(object):
                 else sum(card.points for card in self.hand))
 
     def get_hard_hand_value(self):
+        """
+        Calculates hand value with any Ace as 11 as long as it doesn't lead to bust
+        :return: int
+        """
         if self.check_natural_win():
             return 21.1
         else:

@@ -17,12 +17,13 @@ class Card(object):
     def __init__(self, value, suit):
         self.value = value
         self.suit = suit
-        self.points = self.get_card_points()
+        self.points = self.card_points
 
     def __repr__(self):
         return '{} of {}'.format(self.value, self.suit)
 
-    def get_card_points(self):
+    @property
+    def card_points(self):
         """
         Runs when a Card is instantiated
         Assigns each card a points value
@@ -88,7 +89,7 @@ class Player(object):
         for card in self.hand:
             print card
 
-    def check_natural_win(self):
+    def is_natural_win(self):
         """
         Makes a set of all values of cards in hand
         Checks length of set is 2, Ace is in hand and set is subset of facecards
@@ -99,23 +100,25 @@ class Player(object):
             return len(vals) == 2 and 'Ace' in vals and vals < {'Ace', 'Jack', 'King', 'Queen'}
         return False
 
-    def get_soft_hand_value(self):
+    @property
+    def soft_hand_value(self):
         """
         Calculates hand value with Ace as 1
         :return: int
         """
-        return (21.1 if self.check_natural_win()
+        return (21.1 if self.is_natural_win()
                 else sum(card.points for card in self.hand))
 
-    def get_hand_value(self):
+    @property
+    def hand_value(self):
         """
         Calculates hand value with any Ace as 11 as long as it doesn't lead to bust
         :return: int
         """
-        if self.check_natural_win():
+        if self.is_natural_win():
             return 21.1
         else:
-            hand_total = self.get_soft_hand_value()
+            hand_total = self.soft_hand_value
             if hand_total <= 11 and any(card.value == 'Ace' for card in self.hand):
                 hand_total += 10
             return hand_total
@@ -127,8 +130,8 @@ class Player(object):
         Else return soft.
         :return: int
         """
-        soft_value = self.get_soft_hand_value()
-        hard_value = self.get_hand_value()
+        soft_value = self.soft_hand_value
+        hard_value = self.hand_value
         if hard_value >= 22:
             return soft_value
         else:
@@ -142,8 +145,8 @@ class Player(object):
         """
         for card in self.hand:
             print card
-        soft_value = self.get_soft_hand_value()
-        hard_value = self.get_hand_value()
+        soft_value = self.soft_hand_value
+        hard_value = self.hand_value
         if hard_value == 21.1 or soft_value == 21.1:
             print '\nHand value is Natural 21!'
         elif hard_value == soft_value or hard_value >= 22:
@@ -303,7 +306,8 @@ class Dealer(Player):
         if self.choose_hard_or_soft_value() > 21:
             self.dealer_went_bust = True
 
-    def get_faceup_card(self):
+    @property
+    def faceup_card(self):
         """
         Returns first card in dealers hard
         This is "face up" card that Gambler can see while taking their turn
@@ -359,7 +363,8 @@ class Game(object):
         self.num_active_players = 0
         self.buy_in = 5
 
-    def get_num_active_hand(self):
+    @property
+    def num_active_hand(self):
         """
         Return number of active Gamblers in this hand (Not bust or win)
         :return: int
@@ -370,7 +375,8 @@ class Game(object):
                 count += 1
         return count
 
-    def get_num_active_game(self):
+    @property
+    def num_active_game(self):
         """
         Returns num of active Gamblers this game. (Not broke)
         :return: int
@@ -485,9 +491,9 @@ class Game(object):
             for gambler in self.players:
                 if gambler.active_this_game:
                     print_gambler_turn(gambler)
-                    gambler.take_turn(self.deal.get_faceup_card(), self.deck)
+                    gambler.take_turn(self.deal.faceup_card, self.deck)
 
-            if self.get_num_active_hand() > 0:
+            if self.num_active_hand > 0:
                 print_dealer_turn()
                 self.deal.dealer_take_turn(self.deck)
                 print_final_results_lines()

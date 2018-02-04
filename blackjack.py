@@ -97,6 +97,7 @@ class Player(object):
         if len(self.hand) == 2:
             return ((self.hand[0].value == 'Ace' and self.hand[1].value in ('Jack', 'King', 'Queen')) or
                     (self.hand[1].value == 'Ace' and self.hand[0].value in ('Jack', 'King', 'Queen')))
+        return False
 
     def get_soft_hand_value(self):
         """
@@ -107,13 +108,13 @@ class Player(object):
                 else sum(card.points for card in self.hand))
 
     def get_hard_hand_value(self):
-        """
-        Calculates hand value with Ace as 11
-        :return: int
-        """
-        return (21.1 if self.check_natural_win()
-                else self.get_soft_hand_value() +
-                10 * sum(card.value == 'Ace' for card in self.hand))
+        if self.check_natural_win():
+            return 21.1
+        else:
+            hand_total = self.get_soft_hand_value()
+            if hand_total <= 11 and any(card.value == 'Ace' for card in self.hand):
+                hand_total += 10
+            return hand_total
 
     def choose_hard_or_soft_value(self):
         """

@@ -107,7 +107,7 @@ class Player(object):
         return (21.1 if self.check_natural_win()
                 else sum(card.points for card in self.hand))
 
-    def get_hard_hand_value(self):
+    def get_hand_value(self):
         """
         Calculates hand value with any Ace as 11 as long as it doesn't lead to bust
         :return: int
@@ -128,7 +128,7 @@ class Player(object):
         :return: int
         """
         soft_value = self.get_soft_hand_value()
-        hard_value = self.get_hard_hand_value()
+        hard_value = self.get_hand_value()
         if hard_value >= 22:
             return soft_value
         else:
@@ -143,7 +143,7 @@ class Player(object):
         for card in self.hand:
             print card
         soft_value = self.get_soft_hand_value()
-        hard_value = self.get_hard_hand_value()
+        hard_value = self.get_hand_value()
         if hard_value == 21.1 or soft_value == 21.1:
             print '\nHand value is Natural 21!'
         elif hard_value == soft_value or hard_value >= 22:
@@ -151,7 +151,7 @@ class Player(object):
         else:
             print '\nSoft hand value is {} ' \
                   '\nHard hand value is: {}'.format(self.get_soft_hand_value(),
-                                                    self.get_hard_hand_value())
+                                                    self.get_hand_value())
 
 
 class Gambler(Player):

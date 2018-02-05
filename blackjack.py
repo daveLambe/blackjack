@@ -22,6 +22,9 @@ class Card(object):
     def __repr__(self):
         return '{} of {}'.format(self.value, self.suit)
 
+    def __str__(self):
+        return '{} of {}'.format(self.value, self.suit)
+
     @property
     def card_points(self):
         """
@@ -81,13 +84,6 @@ class Player(object):
         Sets Player hand(list) to empty
         """
         self.hand = []
-
-    def print_entire_hand(self):
-        """
-        Prints entire Player hand (list)
-        """
-        for card in self.hand:
-            print card
 
     def is_natural_win(self):
         """
